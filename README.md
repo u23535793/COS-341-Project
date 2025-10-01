@@ -1,1 +1,2 @@
-# COS-341-Project
+# COS-341-Project-Frontend
+

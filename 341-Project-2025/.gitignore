@@ -1,0 +1,38 @@
+# --------------------------
+# Maven build folders
+# --------------------------
+target/
+*.log
+
+# --------------------------
+# IDE/editor files
+# --------------------------
+.vscode/
+*.iml
+
+# --------------------------
+# Compiled Java classes
+# --------------------------
+*.class
+
+# --------------------------
+# OS files
+# --------------------------
+.DS_Store
+Thumbs.db
+
+# --------------------------
+# ANTLR generated sources (optional)
+# Uncomment if you want them ignored
+# target/generated-sources/antlr4/
+
+# --------------------------
+# Temporary / test input files
+# --------------------------
+file.lst
+inputfiles.lst
+
+# --------------------------
+# Maven wrapper (optional)
+# --------------------------
+.mvn/wrapper/maven-wrapper.jar
