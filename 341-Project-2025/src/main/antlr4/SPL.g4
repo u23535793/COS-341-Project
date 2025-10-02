@@ -31,7 +31,7 @@ procdefs
     ;
 
 pdef
-    : name '(' param? ')' '{' body '}'
+    : name '(' param ')' '{' body '}'
     ;
 
 funcdefs
@@ -40,7 +40,7 @@ funcdefs
     ;
 
 fdef
-    : name '(' param? ')' '{' body ';' 'return' atom '}'
+    : name '(' param ')' '{' body ';' 'return' atom '}'
     ;
 
 body
@@ -75,14 +75,14 @@ algo
 instr
     : 'halt'
     | 'print' output
-    | name '(' input? ')'      // procedure call
+    | name '(' input ')'      // procedure call
     | assign
     | loop
     | branch
     ;
 
 assign
-    : var '=' name '(' input? ')'   // function call
+    : var '=' name '(' input ')'   // function call
     | var '=' term
     ;
 
@@ -119,15 +119,26 @@ unop
     | 'not'
     ;
 
+//binop
+//    : 'eq'
+//    | '>'
+//    | 'or'
+//    | 'and'
+//    | 'plus'
+//    | 'minus'
+//    | 'mult'
+//    | 'div'
+//    ;
+
 binop
-    : 'eq'
-    | '>'
-    | 'or'
-    | 'and'
-    | 'plus'
-    | 'minus'
-    | 'mult'
-    | 'div'
+    : EQ
+    | GT
+    | OR
+    | AND
+    | PLUS
+    | MINUS
+    | MULT
+    | DIV
     ;
 
 // ===============================
@@ -152,36 +163,20 @@ RETURN  : 'return';
 NEG     : 'neg';
 NOT     : 'not';
 EQ      : 'eq';
+GT      : '>';
 OR      : 'or';
 AND     : 'and';
 PLUS    : 'plus';
 MINUS   : 'minus';
 MULT    : 'mult';
 DIV     : 'div';
-LPAREN : '(' ;
-RPAREN : ')' ;
-LBRACE : '{' ;
-RBRACE : '}' ;
-SEMICOLON   : ';' ;
-EQ : '=' ;
-GT : '>' ;
 
-UDN
-    : [a-z][a-z0-9]*
-    ;
+UDN     : [a-z][a-z0-9]*;
 
-NUMBER
-    : '0' | [1-9][0-9]*
-    ;
+NUMBER  : '0' | [1-9][0-9]*;
 
-STRING
-    : '"' [a-zA-Z0-9]{0,15} '"'
-    ;
+STRING  : '"' [a-zA-Z0-9]* '"';
 
-WS
-    : [ \t\r\n]+ -> skip
-    ;
+WS      : [ \t\r\n]+ -> skip;
 
-COMMENT
-    : '//' ~[\r\n]* -> skip
-    ;
+COMMENT : '//' ~[\r\n]* -> skip;
