@@ -36,6 +36,7 @@
           </execution>
         </executions>
         <configuration>
+          <visitor>true</visitor>
           <outputDirectory>${project.build.directory}/generated-sources/antlr4</outputDirectory>
           <arguments>
             <argument>-package</argument>
