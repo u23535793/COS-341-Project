@@ -1,6 +1,6 @@
 # COS-341-Project-Frontend
 
->_To build and run the current frontend use: ```mvn -q clean compile exec:java -Dexec.mainClass="com.spl.TestSPL" ```_
+>_To build and run the current frontend use: ```cd "341-Project-2025"``` ```mvn -q clean compile exec:java -Dexec.mainClass="com.spl.TestSPL" ```_
 
 This is the frontend of the SPL compiler for the 2025 project. It uses ANTLR 4 for lexical and syntax analysis (parsing) and is built with Maven.  
 

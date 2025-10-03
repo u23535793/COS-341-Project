@@ -6,7 +6,6 @@ import java.util.*;
 
 public class TestSPL {
 
-    // ID generator for nodes
     public static class NodeIDGenerator {
         private static int counter = 0;
         public static int nextID() {
@@ -14,7 +13,6 @@ public class TestSPL {
         }
     }
 
-    // Visitor that assigns unique IDs to every parse tree node
     public static class NodeIDAssigner extends SPLBaseVisitor<Integer> {
         private final Map<ParseTree, Integer> nodeIDs = new LinkedHashMap<>();
 
@@ -57,10 +55,10 @@ public class TestSPL {
         System.out.println(tree.toStringTree(parser));
         System.out.println();
 
-        System.out.println("Parse Tree with Node IDs:");
-        printTreeWithIDs(tree, parser, nodeIDs, 0);
+        // System.out.println("Parse Tree with Node IDs:");
+        // printTreeWithIDs(tree, parser, nodeIDs, 0);
 
-        System.out.println("\nNodeID | RuleName | Text");
+        System.out.println("\nNodeID | RuleName  | Text");
         for (ParseTree node : nodeIDs.keySet()) {
             int id = nodeIDs.get(node);
             String ruleName = (node instanceof RuleContext) 
@@ -68,6 +66,11 @@ public class TestSPL {
                     : node.getText();
             System.out.printf("%6d | %-10s | %s%n", id, ruleName, node.getText());
         }
+
+        SymbolTableBuilder builder = new SymbolTableBuilder(parser, nodeIDs);
+        builder.visit(tree);
+        System.out.println("\n=== Symbol Table ===");
+        builder.getSymbolTable().print();
 
     }
 

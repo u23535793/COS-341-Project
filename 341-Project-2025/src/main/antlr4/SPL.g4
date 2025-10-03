@@ -92,8 +92,7 @@ loop
     ;
 
 branch
-    : 'if' term '{' algo '}'
-    | 'if' term '{' algo '}' 'else' '{' algo '}'
+    : 'if' term '{' algo '}' ('else' '{' algo '}')?
     ;
 
 output
@@ -118,17 +117,6 @@ unop
     : 'neg'
     | 'not'
     ;
-
-//binop
-//    : 'eq'
-//    | '>'
-//    | 'or'
-//    | 'and'
-//    | 'plus'
-//    | 'minus'
-//    | 'mult'
-//    | 'div'
-//    ;
 
 binop
     : EQ
