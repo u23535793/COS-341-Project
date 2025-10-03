@@ -1,0 +1,38 @@
+# --------------------------
+# Maven build folders
+# --------------------------
+target/
+*.log
+
+# --------------------------
+# IDE/editor files
+# --------------------------
+.vscode/
+*.iml
+
+# --------------------------
+# Compiled Java classes
+# --------------------------
+*.class
+
+# --------------------------
+# OS files
+# --------------------------
+.DS_Store
+Thumbs.db
+
+# --------------------------
+# Temporary / test input files
+# --------------------------
+file.lst
+inputfiles.lst
+
+# --------------------------
+# Maven wrapper (optional)
+# --------------------------
+.mvn/wrapper/maven-wrapper.jar
+
+# --------------------------
+# ANTLR VS Code plugin cache
+# --------------------------
+src/main/antlr4/.antlr/
