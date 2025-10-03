@@ -44,6 +44,20 @@ This will:
 - Compile all Java source files into target/classes.
 
 ## Running the Frontend 
+```
+String inputFile = args.length > 0 ? args[0] : "test.spl";
+CharStream input = CharStreams.fromFileName(inputFile);
+
+SPLLexer lexer = new SPLLexer(input);
+CommonTokenStream tokens = new CommonTokenStream(lexer);
+
+SPLParser parser = new SPLParser(tokens);
+ParseTree tree = parser.spl_prog();
+
+NodeIDAssigner assigner = new NodeIDAssigner();
+assigner.visit(tree);
+Map<ParseTree, Integer> nodeIDs = assigner.getNodeIDs();
+```
 To run the SPL parser on a SPL source file:  
 ```
 mvn exec:java -Dexec.mainClass="com.spl.TestSPL" -Dexec.args="path/to/your/file.spl"
@@ -58,3 +72,28 @@ mvn exec:java -Dexec.mainClass="com.spl.TestSPL" -Dexec.args="path/to/your/file.
 - The TestSPL class can be used to test SPL programs quickly.
 - To build and run everything at once use: ```mvn -q clean compile exec:java -Dexec.mainClass="com.spl.TestSPL" ```
   - remove ```-q``` to view info and warnings in the console
+
+## Symbol Table 
+
+1. **Scopes** 
+- Each scope (global, myproc, myfunc, or main) is represented by a Map<Integer, Symbol> storing symbols defined in that scope.
+- Scopes are managed as a stack (Deque) to support nesting:
+  - enterScope("scopeName") pushes a new scope onto the stack.
+  - exitScope() pops the current scope.
+- All scopes are also stored in allScopes for printing and debugging.
+
+2. **Symbols** 
+- Each symbol is represented by a Symbol object containing:
+  - name — the variable, function, or procedure name.
+  - kind — "var", "param", "func", "proc".
+  - nodeId — a unique identifier for the parse tree node.
+  - scope — the scope in which the symbol is defined.
+- Symbols are added to the current scope with define(Symbol sym).
+
+3. **Creating the Symbol Table from the Parse Tree**
+```
+SymbolTableBuilder builder = new SymbolTableBuilder(parser, nodeIDs);
+builder.visit(tree);
+System.out.println("\n=== Symbol Table ===");
+builder.getSymbolTable().print();
+```
