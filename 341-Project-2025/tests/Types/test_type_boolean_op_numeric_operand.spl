@@ -1,0 +1,6 @@
+glob { }
+proc { }
+func { }
+main { var { x }
+  if ((5 and 10)) { halt }
+}

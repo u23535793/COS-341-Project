@@ -1,0 +1,9 @@
+glob { }
+proc { }
+func { 
+  badfunc(x) { local { } halt; return (1 or 0) }
+}
+main { var { a b }
+  a = (5 and 10);
+  if (42) { b = (neg (not 3)); halt }
+}

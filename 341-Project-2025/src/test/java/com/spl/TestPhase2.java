@@ -9,9 +9,6 @@ import org.antlr.v4.runtime.tree.*;
 import java.io.*;
 import java.util.*;
 
-/**
- * JUnit test suite for SPL Phase 2: Name-Scope Analysis
- */
 public class TestPhase2 extends TestCase {
 
     private static class TestCase {
@@ -61,9 +58,6 @@ public class TestPhase2 extends TestCase {
         return new TestSuite(TestPhase2.class);
     }
 
-    /**
-     * Main test method that runs all test cases
-     */
     public void testAllPhase2Cases() {
         System.out.println("\n" + "=".repeat(80));
         System.out.println("SPL PHASE 2: NAME-SCOPE ANALYSIS TEST SUITE");
@@ -76,16 +70,13 @@ public class TestPhase2 extends TestCase {
         printSummary();
     }
 
-    /**
-     * Run a single test case
-     */
     private void runSingleTest(TestCase test) {
         System.out.println("\n[TEST] " + test.filename);
         System.out.println("       Description: " + test.description);
         System.out.println("       Expected: " + (test.expectSuccess ? "✓ PASS" : "✗ FAIL"));
 
         try {
-            File testFile = new File("tests/" + test.filename);
+            File testFile = new File("tests/Scope/" + test.filename);
             if (!testFile.exists()) {
                 System.err.println("       Result: ❌ FAILED - File not found: " + testFile.getAbsolutePath());
                 failCount++;
@@ -167,9 +158,6 @@ public class TestPhase2 extends TestCase {
         }
     }
 
-    /**
-     * Print test summary
-     */
     private void printSummary() {
         System.out.println("\n" + "=".repeat(80));
         System.out.println("TEST SUMMARY");

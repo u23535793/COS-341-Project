@@ -1,0 +1,9 @@
+glob { x y z }
+proc { }
+func { 
+  add(a b) { local { c } halt; return (a plus b) }
+}
+main { var { result } 
+  result = 15;
+  if (result > 5) { print result; halt }
+}

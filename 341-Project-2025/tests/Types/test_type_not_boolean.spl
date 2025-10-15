@@ -1,0 +1,6 @@
+glob { }
+proc { }
+func { }
+main { var { x }
+  if ((not (5 > 3))) { halt }
+}

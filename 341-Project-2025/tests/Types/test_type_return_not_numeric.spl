@@ -1,0 +1,6 @@
+glob { }
+proc { }
+func { 
+  badfunc(x) { local { } halt; return (neg (not x)) }
+}
+main { var { } halt }

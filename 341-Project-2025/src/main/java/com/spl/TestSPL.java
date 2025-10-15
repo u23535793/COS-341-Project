@@ -70,7 +70,8 @@ public class TestSPL {
         builder.visit(tree);
 
         System.out.println("\n=== Symbol Table ===");
-        builder.getSymbolTable().print();
+        SymbolTable symTable = builder.getSymbolTable();
+        symTable.print();
 
         // Print violations
         List<String> violations = builder.getViolations();
@@ -81,6 +82,19 @@ public class TestSPL {
             System.out.println("✗ Found " + violations.size() + " violation(s):");
             for (int i = 0; i < violations.size(); i++) {
                 System.out.println("  " + (i + 1) + ". " + violations.get(i));
+            }
+        }
+
+        TypeAnalyzer typeAnalyzer = new TypeAnalyzer(parser, nodeIDs, symTable);
+        typeAnalyzer.visit(tree);
+
+        List<String> typeErrors = typeAnalyzer.getTypeErrors();
+        if (typeErrors.isEmpty()) {
+            System.out.println("✓ Program is correctly typed");
+        } else {
+            System.out.println("✗ Type errors found:");
+            for (String error : typeErrors) {
+                System.out.println("  - " + error);
             }
         }
     }

@@ -1,0 +1,9 @@
+glob { }
+proc { 
+  printargs(a b c) { local { } print a; print b; print c; halt }
+}
+func { }
+main { var { x y z }
+  printargs(x y z);
+  halt
+}
