@@ -1,0 +1,8 @@
+glob { counter }
+proc { }
+func { }
+main { var { n }
+  counter = 0;
+  while (counter > 0) { halt };
+  do { halt } until (n > 10)
+}

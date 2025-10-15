@@ -1,0 +1,4 @@
+glob { globalX }
+proc { myproc(x) { local { } print globalX; halt } }
+func { }
+main { var { } halt }

@@ -1,0 +1,4 @@
+glob { x }
+proc { }
+func { }
+main { var { a b a } halt }
