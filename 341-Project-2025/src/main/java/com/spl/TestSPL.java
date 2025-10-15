@@ -51,14 +51,12 @@ public class TestSPL {
         assigner.visit(tree);
         Map<ParseTree, Integer> nodeIDs = assigner.getNodeIDs();
 
-        System.out.println("\nParse Tree (toStringTree format):");
+        System.out.println("\n=== Parse Tree ===");
         System.out.println(tree.toStringTree(parser));
         System.out.println();
 
-        // System.out.println("Parse Tree with Node IDs:");
-        // printTreeWithIDs(tree, parser, nodeIDs, 0);
-
-        System.out.println("\nNodeID | RuleName  | Text");
+        System.out.println("=== NodeID Mapping ===");
+        System.out.println("NodeID | RuleName  | Text");
         for (ParseTree node : nodeIDs.keySet()) {
             int id = nodeIDs.get(node);
             String ruleName = (node instanceof RuleContext) 
@@ -67,25 +65,23 @@ public class TestSPL {
             System.out.printf("%6d | %-10s | %s%n", id, ruleName, node.getText());
         }
 
+        // Build symbol table and validate
         SymbolTableBuilder builder = new SymbolTableBuilder(parser, nodeIDs);
         builder.visit(tree);
+
         System.out.println("\n=== Symbol Table ===");
         builder.getSymbolTable().print();
 
-    }
-
-    public static void printTreeWithIDs(ParseTree tree, Parser parser, Map<ParseTree, Integer> nodeIDs, int indent) {
-        for (int i = 0; i < indent; i++) System.out.print("  ");
-
-        int id = nodeIDs.get(tree);
-        String ruleName = (tree instanceof RuleContext)
-                ? parser.getRuleNames()[((RuleContext) tree).getRuleIndex()]
-                : tree.getText();
-
-        System.out.println("[" + id + "] " + ruleName + " -> " + tree.getText());
-
-        for (int i = 0; i < tree.getChildCount(); i++) {
-            printTreeWithIDs(tree.getChild(i), parser, nodeIDs, indent + 1);
+        // Print violations
+        List<String> violations = builder.getViolations();
+        System.out.println("\n=== Semantic Analysis Report ===");
+        if (violations.isEmpty()) {
+            System.out.println("✓ No violations found!");
+        } else {
+            System.out.println("✗ Found " + violations.size() + " violation(s):");
+            for (int i = 0; i < violations.size(); i++) {
+                System.out.println("  " + (i + 1) + ". " + violations.get(i));
+            }
         }
     }
 }

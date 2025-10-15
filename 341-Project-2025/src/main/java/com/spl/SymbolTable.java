@@ -10,9 +10,12 @@ public class SymbolTable {
     // for name-based look up: node names -> list of symbols in current scope
     private final Deque<Map<String, List<Symbol>>> nameMaps = new ArrayDeque<>();
 
-    //all scopes for printing
+    // all scopes for printing
     private final List<Map<Integer, Symbol>> allScopes = new ArrayList<>();
     private final List<String> allScopeNames = new ArrayList<>();
+
+    // track variable usages (node id -> symbol it refers to)
+    private final Map<Integer, Symbol> variableUsages = new HashMap<>();
 
     public SymbolTable() {
         enterScope("global");
@@ -39,7 +42,6 @@ public class SymbolTable {
         return scopeNames.peek();
     }
 
-    // add a symbol to the current scope
     public void define(Symbol sym) {
         scopes.peek().put(sym.nodeId, sym);
 
@@ -47,7 +49,6 @@ public class SymbolTable {
         nameMap.computeIfAbsent(sym.name, k -> new ArrayList<>()).add(sym);
     }
 
-    // look up by nodeId (unique)
     public Symbol lookupByNodeId(int nodeId) {
         for (Map<Integer, Symbol> scope : scopes) {
             if (scope.containsKey(nodeId)) {
@@ -55,6 +56,42 @@ public class SymbolTable {
             }
         }
         return null;
+    }
+
+    public Symbol lookupVariableInAllScopes(String varName) {
+        for (Map<String, List<Symbol>> nameMap : nameMaps) {
+            if (nameMap.containsKey(varName)) {
+                List<Symbol> symbols = nameMap.get(varName);
+                if (!symbols.isEmpty()) {
+                    return symbols.get(symbols.size() - 1);
+                }
+            }
+        }
+        return null;
+    }
+
+    public Map<String, List<Symbol>> getNameMapForCurrentScope() {
+        return nameMaps.peek();
+    }
+
+    public Map<String, List<Symbol>> getGlobalScopeSymbols() {
+        if (nameMaps.isEmpty()) {
+            return new HashMap<>();
+        }
+        // The last element in the deque is the global scope
+        Deque<Map<String, List<Symbol>>> temp = new ArrayDeque<>(nameMaps);
+        while (temp.size() > 1) {
+            temp.pop();
+        }
+        return temp.peek();
+    }
+
+    public void recordVariableUsage(int nodeId, Symbol symbol) {
+        variableUsages.put(nodeId, symbol);
+    }
+
+    public Symbol getVariableUsage(int nodeId) {
+        return variableUsages.get(nodeId);
     }
 
     public void print() {
