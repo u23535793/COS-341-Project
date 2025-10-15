@@ -1,4 +1,0 @@
-glob { x y z }
-proc { myproc(a) { local { b c } print x; halt } }
-func { myfunc(p q) { local { r } print p; return r } }
-main { var { m n } print x; halt }

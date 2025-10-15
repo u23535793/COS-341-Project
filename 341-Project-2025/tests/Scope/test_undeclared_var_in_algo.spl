@@ -1,4 +1,0 @@
-glob { x }
-proc { myproc(a) { local { b } print z; halt } }
-func { }
-main { var { } halt }

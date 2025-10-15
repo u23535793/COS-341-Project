@@ -1,9 +1,0 @@
-glob { }
-proc { }
-func { 
-  badfunc(x) { local { } halt; return 1 }
-}
-main { var { a }
-  a = (5 and 10);
-  halt
-}

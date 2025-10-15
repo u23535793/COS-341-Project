@@ -1,8 +1,0 @@
-glob { }
-proc { }
-func { }
-main { var { }
-  print "hello";
-  print "test123";
-  halt
-}
