@@ -1,4 +1,4 @@
-glob { x y z }
+glob { x y x }
 proc { myproc(x) { local { b } halt } }
 func { myfunc(a) { local { b } print "hi"; return a } }
 main { var { x y } halt }

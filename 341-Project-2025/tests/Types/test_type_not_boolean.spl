@@ -1,6 +1,6 @@
-glob { }
+glob { x }
 proc { }
 func { }
-main { var { x }
-  if ((not (5 > 3))) { halt }
+main { var { }
+  if (not (x > 3)) { halt }
 }

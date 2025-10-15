@@ -3,10 +3,6 @@ package com.spl;
 import org.antlr.v4.runtime.tree.*;
 import java.util.*;
 
-/**
- * Type Analyzer for SPL programs
- * Performs syntax-based type analysis on the parse tree
- */
 public class TypeAnalyzer extends SPLBaseVisitor<String> {
     private final SymbolTable symTable;
     private final SPLParser parser;
@@ -28,8 +24,6 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
     public List<String> getTypeErrors() {
         return typeErrors;
     }
-
-    // ==================== HELPER METHODS ====================
 
     private void addTypeError(String message) {
         typeErrors.add(message);
@@ -56,8 +50,6 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
         return TYPE_TYPELESS.equals(type);
     }
 
-    // ==================== VISITOR METHODS ====================
-
     @Override
     public String visitSpl_prog(SPLParser.Spl_progContext ctx) {
         // Visit all sections
@@ -68,8 +60,6 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
 
         return typeErrors.isEmpty() ? "valid" : "invalid";
     }
-
-    // ==================== VARIABLES & PARAMS ====================
 
     @Override
     public String visitVariables(SPLParser.VariablesContext ctx) {
@@ -128,8 +118,6 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
         return "valid";
     }
 
-    // ==================== PROCEDURES & FUNCTIONS ====================
-
     @Override
     public String visitPdef(SPLParser.PdefContext ctx) {
         String procName = ctx.name().getText();
@@ -176,8 +164,6 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
 
         return "valid";
     }
-
-    // ==================== BODY & ALGO ====================
 
     @Override
     public String visitBody(SPLParser.BodyContext ctx) {
@@ -229,8 +215,6 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
 
         return "valid";
     }
-
-    // ==================== INSTRUCTIONS ====================
 
     @Override
     public String visitInstr(SPLParser.InstrContext ctx) {
@@ -324,8 +308,6 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
         return "valid";
     }
 
-    // ==================== OUTPUT & INPUT ====================
-
     @Override
     public String visitOutput(SPLParser.OutputContext ctx) {
         if (ctx.STRING() != null) {
@@ -359,8 +341,6 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
 
         return "valid";
     }
-
-    // ==================== ATOMS & TERMS ====================
 
     @Override
     public String visitAtom(SPLParser.AtomContext ctx) {
@@ -441,8 +421,6 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
         }
         return "invalid";
     }
-
-    // ==================== OPERATORS ====================
 
     @Override
     public String visitUnop(SPLParser.UnopContext ctx) {

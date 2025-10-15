@@ -1,6 +1,0 @@
-glob { }
-proc { }
-func { }
-main { var { x }
-  while (5) { halt }
-}

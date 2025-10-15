@@ -2,11 +2,8 @@ glob { data result }
 proc { 
   process(input) { local { temp } temp = input; print temp; halt }
 }
-func { 
-  calc(a b) { local { c } 
-    halt; return (a plus b) }
-}
-main { var { x y }
+func { }
+main { var { x }
   x = 30;
   if (x > 15) { 
     result = (x minus 5);
