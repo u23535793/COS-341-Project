@@ -1,4 +1,0 @@
-glob { }
-proc { foo(a) { local { } halt } }
-func { foo(b) { local { } return b } }
-main { var { } halt }

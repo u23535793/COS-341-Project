@@ -1,7 +1,0 @@
-glob { }
-proc { }
-func { }
-main { var { x }
-  x = ((1 or 0) plus 5);
-  halt
-}

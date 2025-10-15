@@ -1,7 +1,0 @@
-glob { }
-proc { }
-func { }
-main { var { result x }
-  result = 15;
-  if (result > 5) { print result; halt }
-}

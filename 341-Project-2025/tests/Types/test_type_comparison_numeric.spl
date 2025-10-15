@@ -1,6 +1,0 @@
-glob { }
-proc { }
-func { }
-main { var { x y }
-  if (x > y) { print x; halt }
-}
