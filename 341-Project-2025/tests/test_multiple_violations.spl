@@ -1,0 +1,4 @@
+glob { x x y }
+proc { myproc(a) { local { a } print unknown; halt } }
+func { }
+main { var { m } halt }

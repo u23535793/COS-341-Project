@@ -47,6 +47,26 @@ public class SymbolTableBuilder extends SPLBaseVisitor<Void> {
         return false;
     }
 
+    private boolean isGlobalFunctionOrProcedure(String name) {
+        // Get the global scope symbols
+        Map<String, List<Symbol>> globalSymbols = symTable.getGlobalScopeSymbols();
+        
+        System.err.println("[DEBUG] Checking for duplicate '" + name + "' in global scope");
+        System.err.println("[DEBUG] Global symbols available: " + globalSymbols.keySet());
+        
+        if (globalSymbols.containsKey(name)) {
+            for (Symbol s : globalSymbols.get(name)) {
+                System.err.println("[DEBUG]   Found symbol: " + s.kind + " '" + s.name + "' in scope '" + s.scope + "'");
+                if (("func".equals(s.kind) || "proc".equals(s.kind)) && "global".equals(s.scope)) {
+                    System.err.println("[DEBUG] >>> DUPLICATE DETECTED!");
+                    return true;
+                }
+            }
+        }
+        System.err.println("[DEBUG] No duplicate found");
+        return false;
+    }
+
     private Symbol lookupVariableInScope(String varName) {
         return symTable.lookupVariableInAllScopes(varName);
     }
@@ -55,14 +75,44 @@ public class SymbolTableBuilder extends SPLBaseVisitor<Void> {
     public Void visitSpl_prog(SPLParser.Spl_progContext ctx) {
         // Visit all sections
         if (ctx.variables() != null) visit(ctx.variables());
-        if (ctx.procdefs() != null) visit(ctx.procdefs());
-        if (ctx.funcdefs() != null) visit(ctx.funcdefs());
+        if (ctx.procdefs() != null) visitAllProcdefs(ctx.procdefs());
+        if (ctx.funcdefs() != null) visitAllFuncdefs(ctx.funcdefs());
         if (ctx.mainprog() != null) visit(ctx.mainprog());
 
         // Check global scope conflicts: no var with same name as func/proc
         checkGlobalConflicts();
 
         return null;
+    }
+
+    private void visitAllProcdefs(SPLParser.ProcdefsContext ctx) {
+        if (ctx == null) return;
+        
+        // Visit pdef if present
+        if (ctx.pdef() != null) {
+            visit(ctx.pdef());
+        }
+        
+        // Recursively visit remaining procdefs
+        if (ctx.procdefs() != null) {
+            visitAllProcdefs(ctx.procdefs());
+        }
+    }
+
+    private void visitAllFuncdefs(SPLParser.FuncdefsContext ctx) {
+        if (ctx == null) {
+            return;
+        }
+        
+        // Visit fdef if present
+        if (ctx.fdef() != null) {
+            visit(ctx.fdef());
+        }
+        
+        // Recursively visit remaining funcdefs
+        if (ctx.funcdefs() != null) {
+            visitAllFuncdefs(ctx.funcdefs());
+        }
     }
 
     private void checkGlobalConflicts() {
@@ -74,13 +124,20 @@ public class SymbolTableBuilder extends SPLBaseVisitor<Void> {
 
         for (String name : globalSymbols.keySet()) {
             for (Symbol s : globalSymbols.get(name)) {
+                // Only add if it's actually in the global scope
+                if (!"global".equals(s.scope)) continue;
+                
+                System.err.println("[DEBUG GLOBAL] Found " + s.kind + " '" + s.name + "' in scope " + s.scope);
+                
                 if ("var".equals(s.kind)) varNames.add(name);
                 else if ("func".equals(s.kind)) funcNames.add(name);
                 else if ("proc".equals(s.kind)) procNames.add(name);
             }
         }
 
-        // Check conflicts
+        System.err.println("[DEBUG GLOBAL] Vars: " + varNames + ", Funcs: " + funcNames + ", Procs: " + procNames);
+
+        // Check conflicts - only exact name matches
         for (String var : varNames) {
             if (funcNames.contains(var)) {
                 addViolation("Variable '" + var + "' conflicts with function name");
@@ -119,7 +176,7 @@ public class SymbolTableBuilder extends SPLBaseVisitor<Void> {
         String currentScope = symTable.currentScopeName();
 
         // Check for duplicate procedure declaration in global scope
-        if (isNameInCurrentScope(name, "proc")) {
+        if (isGlobalFunctionOrProcedure(name)) {
             addViolation("Duplicate procedure '" + name + "' declaration in scope '" + currentScope + "'");
         }
 
@@ -150,7 +207,7 @@ public class SymbolTableBuilder extends SPLBaseVisitor<Void> {
         String currentScope = symTable.currentScopeName();
 
         // Check for duplicate function declaration in global scope
-        if (isNameInCurrentScope(name, "func")) {
+        if (isGlobalFunctionOrProcedure(name)) {
             addViolation("Duplicate function '" + name + "' declaration in scope '" + currentScope + "'");
         }
 
@@ -237,22 +294,7 @@ public class SymbolTableBuilder extends SPLBaseVisitor<Void> {
 
         // Visit variables in main
         if (ctx.variables() != null) {
-            Set<String> varNames = new HashSet<>();
-            if (ctx.variables().children != null) {
-                for (ParseTree child : ctx.variables().children) {
-                    if (child instanceof SPLParser.VarContext) {
-                        int id = nodeIDs.get(child);
-                        String name = child.getText();
-
-                        // Check for duplicate
-                        if (varNames.contains(name)) {
-                            addViolation("Duplicate variable '" + name + "' in main scope");
-                        }
-                        varNames.add(name);
-                        symTable.define(new Symbol(name, "var", id, "main"));
-                    }
-                }
-            }
+            visitVariablesInMain(ctx.variables());
         }
 
         // Visit algo
@@ -260,6 +302,35 @@ public class SymbolTableBuilder extends SPLBaseVisitor<Void> {
 
         symTable.exitScope();
         return null;
+    }
+
+    private void visitVariablesInMain(SPLParser.VariablesContext ctx) {
+        Set<String> varNames = new HashSet<>();
+        
+        // Recursively collect all VAR nodes from variables rule
+        collectVariablesRecursively(ctx, varNames);
+    }
+
+    private void collectVariablesRecursively(ParseTree tree, Set<String> seenNames) {
+        if (tree instanceof SPLParser.VarContext) {
+            int id = nodeIDs.get(tree);
+            String name = tree.getText();
+
+            // Check for duplicate
+            if (seenNames.contains(name)) {
+                addViolation("Duplicate variable '" + name + "' in scope '" + symTable.currentScopeName() + "'");
+            }
+            seenNames.add(name);
+            symTable.define(new Symbol(name, "var", id, symTable.currentScopeName()));
+        }
+
+        // Recurse through children
+        if (tree instanceof ParserRuleContext) {
+            ParserRuleContext ctx = (ParserRuleContext) tree;
+            for (int i = 0; i < ctx.getChildCount(); i++) {
+                collectVariablesRecursively(ctx.getChild(i), seenNames);
+            }
+        }
     }
 
     @Override

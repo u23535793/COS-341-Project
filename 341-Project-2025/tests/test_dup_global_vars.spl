@@ -1,0 +1,4 @@
+glob { x y x }
+proc { myproc(a) { local { b } halt } }
+func { myfunc(p) { local { c } return p } }
+main { var { m } halt }
