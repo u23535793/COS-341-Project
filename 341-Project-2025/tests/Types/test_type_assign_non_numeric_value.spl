@@ -1,0 +1,7 @@
+glob { }
+proc { }
+func { }
+main { var { x }
+  x = (1 and 0);
+  halt
+}

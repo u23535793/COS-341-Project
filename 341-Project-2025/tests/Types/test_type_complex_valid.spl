@@ -1,0 +1,14 @@
+glob { data result }
+proc { 
+  process(input) { local { temp } temp = input; print temp; halt }
+}
+func { }
+main { var { x }
+  x = 30;
+  if (x > 15) { 
+    result = (x minus 5);
+    process(result)
+  } else { 
+    halt 
+  }
+}
