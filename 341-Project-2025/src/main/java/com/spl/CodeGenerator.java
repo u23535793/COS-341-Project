@@ -64,41 +64,36 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
     }
     
     private String generateAndExpression(String left, String right) {
-        String labelFalse = newLabel();
+        String labelCheckB = newLabel();
         String labelTrue = newLabel();
-        String labelExit = newLabel();
+        String labelEnd = newLabel();
         
         String temp = newTemp();
-        String result = "IF " + left + " THEN " + labelTrue + "\n" +
-                       "GOTO " + labelFalse + "\n" +
+        // Fig 6.8 pattern: Initialize as FALSE first, set TRUE only if both conditions pass
+        String result = temp + " = 0\n" +                           // Assume false
+                       "IF " + left + " THEN " + labelCheckB + "\n" +
+                       "GOTO " + labelEnd + "\n" +
+                       "REM " + labelCheckB + "\n" +
+                       "IF " + right + " THEN " + labelTrue + "\n" +
+                       "GOTO " + labelEnd + "\n" +
                        "REM " + labelTrue + "\n" +
-                       "IF " + right + " THEN " + labelExit + "\n" +
-                       "GOTO " + labelFalse + "\n" +
-                       "REM " + labelFalse + "\n" +
-                       temp + " = 0\n" +
-                       "GOTO " + labelExit + "\n" +
-                       "REM " + labelExit + "\n" +
-                       temp + " = 1";
+                       temp + " = 1\n" +                           // Set true only if both pass
+                       "REM " + labelEnd;
         
         code.append(result + "\n");
         return temp;
     }
     
     private String generateOrExpression(String left, String right) {
-        String labelTrue = newLabel();
-        String labelFalse = newLabel();
-        String labelExit = newLabel();
+        String labelEnd = newLabel();
         
         String temp = newTemp();
-        String result = "IF " + left + " THEN " + labelTrue + "\n" +
-                       "IF " + right + " THEN " + labelTrue + "\n" +
-                       "GOTO " + labelFalse + "\n" +
-                       "REM " + labelTrue + "\n" +
-                       temp + " = 1\n" +
-                       "GOTO " + labelExit + "\n" +
-                       "REM " + labelFalse + "\n" +
-                       temp + " = 0\n" +
-                       "REM " + labelExit;
+        // Fig 6.8 pattern: Initialize as TRUE first (optimistic), set FALSE only if both fail
+        String result = temp + " = 1\n" +                          // Assume true
+                       "IF " + left + " THEN " + labelEnd + "\n" +  // If A is true, done
+                       "IF " + right + " THEN " + labelEnd + "\n" + // If B is true, done
+                       temp + " = 0\n" +                           // Only reach here if BOTH false
+                       "REM " + labelEnd;
         
         code.append(result + "\n");
         return temp;
