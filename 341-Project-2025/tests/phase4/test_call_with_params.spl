@@ -1,0 +1,14 @@
+glob { x y result }
+proc {
+    myproc(a b) { local { } print a; print b }
+}
+func {
+    myfunc(p q) { local { } halt; return p }
+}
+main {
+    var { }
+    x = 5;
+    y = 3;
+    myproc(x y);
+    result = myfunc(x y)
+}

@@ -1,0 +1,13 @@
+glob { x y z }
+proc { }
+func { }
+main {
+    var { }
+    x = 5;
+    y = 3;
+    z = 7;
+    
+    if ((x > y) and (z > y)) {
+        print "yes"
+    }
+}

@@ -3,6 +3,7 @@ package com.spl;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import java.util.*;
+import java.nio.file.*;
 
 public class TestSPL {
 
@@ -91,11 +92,30 @@ public class TestSPL {
         List<String> typeErrors = typeAnalyzer.getTypeErrors();
         if (typeErrors.isEmpty()) {
             System.out.println("✓ Program is correctly typed");
+            
+            // Code Generation Phase 4
+            System.out.println("\n=== Code Generation ===");
+            try {
+                CodeGenerator codeGen = new CodeGenerator((SPLParser.Spl_progContext)tree, symTable);
+                String targetCode = codeGen.generate();
+                
+                System.out.println(targetCode);
+                
+                // Save to file
+                String outputFile = inputFile.replace(".spl", ".txt");
+                Files.write(Paths.get(outputFile), targetCode.getBytes());
+                System.out.println("\nTarget code written to: " + outputFile);
+            } catch (Exception e) {
+                System.out.println("✗ Code generation failed:");
+                System.out.println("  - " + e.getMessage());
+                e.printStackTrace();
+            }
         } else {
             System.out.println("✗ Type errors found:");
             for (String error : typeErrors) {
                 System.out.println("  - " + error);
             }
+            System.out.println("\nSkipping code generation due to type errors.");
         }
     }
 }

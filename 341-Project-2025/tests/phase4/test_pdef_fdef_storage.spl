@@ -1,0 +1,15 @@
+glob { x }
+proc {
+    proc1(a) { local { temp } temp = a; print temp }
+    proc2(b c) { local { } print b }
+}
+func {
+    func1(p) { local { } halt; return p }
+    func2(m n) { local { } halt; return m }
+}
+main {
+    var { }
+    x = 10;
+    proc1(x);
+    x = func1(x)
+}
