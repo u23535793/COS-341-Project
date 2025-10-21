@@ -1,0 +1,10 @@
+glob { x y z }
+proc { }
+func { }
+main {
+    var { }
+    x = 10;
+    y = 20;
+    z = (x plus y);
+    print z
+}

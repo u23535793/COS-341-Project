@@ -1,0 +1,11 @@
+glob { x y }
+proc { }
+func { }
+main {
+    var { }
+    x = 5;
+    y = 10;
+    if ((x > 3) and (y > 8)) {
+        print "both"
+    }
+}

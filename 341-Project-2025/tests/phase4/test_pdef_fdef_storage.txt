@@ -1,0 +1,3 @@
+x_global_4 = 10
+CALL proc1 x_global_4
+x_global_4 = CALL func1 x_global_4

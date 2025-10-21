@@ -1,9 +1,16 @@
 package com.spl;
 
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
-import java.util.*;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
 
 public class TestSPL {
 
@@ -93,18 +100,45 @@ public class TestSPL {
         if (typeErrors.isEmpty()) {
             System.out.println("✓ Program is correctly typed");
             
-            // Code Generation Phase 4
-            System.out.println("\n=== Code Generation ===");
+            // Phase 4: Code Generation
+            System.out.println("\n=== Code Generation (Phase 4) ===");
             try {
                 CodeGenerator codeGen = new CodeGenerator((SPLParser.Spl_progContext)tree, symTable);
                 String targetCode = codeGen.generate();
                 
                 System.out.println(targetCode);
                 
-                // Save to file
+                // Save intermediate code to .txt file
                 String outputFile = inputFile.replace(".spl", ".txt");
                 Files.write(Paths.get(outputFile), targetCode.getBytes());
-                System.out.println("\nTarget code written to: " + outputFile);
+                System.out.println("\nIntermediate code written to: " + outputFile);
+                
+                // Phase 5: BASIC Line Number Generation
+                System.out.println("\n=== BASIC Code Generation (Phase 5) ===");
+                BasicCodeGenerator basicGen = new BasicCodeGenerator(targetCode);
+                String basicCode = basicGen.generate();
+                
+                System.out.println(basicCode);
+                
+                // Phase 5
+                String basicOutputFolder = "tests/phase5/bas/";
+                Files.createDirectories(Paths.get(basicOutputFolder));
+
+                String fileName = Paths.get(inputFile).getFileName().toString();
+                String basicOutputFile = basicOutputFolder + fileName.replace(".spl", ".bas");
+
+                Files.write(Paths.get(basicOutputFile), basicCode.getBytes());
+                System.out.println("\nExecutable BASIC code written to: " + basicOutputFile);
+                
+                // Print label mapping for debugging
+                Map<String, Integer> labelMapping = basicGen.getLabelMapping();
+                if (!labelMapping.isEmpty()) {
+                    System.out.println("\n=== Label to Line Number Mapping ===");
+                    for (Map.Entry<String, Integer> entry : labelMapping.entrySet()) {
+                        System.out.println(entry.getKey() + " -> Line " + entry.getValue());
+                    }
+                }
+                
             } catch (Exception e) {
                 System.out.println("✗ Code generation failed:");
                 System.out.println("  - " + e.getMessage());

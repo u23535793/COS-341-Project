@@ -1,0 +1,8 @@
+t1 = x_global_4 + 1
+x_global_4 = 0
+REM L1
+PRINT x_global_4
+x_global_4 = t1
+IF x_global_4 > 5 THEN L2
+GOTO L1
+REM L2

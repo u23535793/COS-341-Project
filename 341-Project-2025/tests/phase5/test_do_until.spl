@@ -1,0 +1,11 @@
+glob { x }
+proc { }
+func { }
+main {
+    var { }
+    x = 0;
+    do {
+        print x;
+        x = (x plus 1)
+    } until (x > 5)
+}

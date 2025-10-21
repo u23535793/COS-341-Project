@@ -1,0 +1,10 @@
+glob { x }
+proc { }
+func { }
+main {
+    var { }
+    x = 5;
+    if (not (x > 10)) {
+        print "small"
+    }
+}
