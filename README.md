@@ -104,10 +104,10 @@ builder.getSymbolTable().print();
 
 ```bash
 # Compile the Java files
-javac -cp ".:antlr-4.x-complete.jar" com/spl/*.java
+mvn clean compile
 
 # Run on a specific .spl file
-java -cp ".:antlr-4.x-complete.jar" com.spl.TestSPL tests/phase5/test_simple_halt.spl
+mvn exec:java -Dexec.mainClass="com.spl.TestSPL" -Dexec.args="tests/phase5/test_print_literal.spl"
 ```
 
 **Output:**
@@ -123,7 +123,7 @@ java -cp ".:antlr-4.x-complete.jar" com.spl.TestSPL tests/phase5/test_simple_hal
 
 ```bash
 # Run all Phase 5 tests
-java -cp ".:antlr-4.x-complete.jar:junit.jar" junit.textui.TestRunner com.spl.TestPhase5
+mvn test -Dtest=TestPhase5
 ```
 
 **The test suite will:**
