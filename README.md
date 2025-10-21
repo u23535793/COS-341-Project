@@ -241,7 +241,8 @@ The `.bas` files can be run on vintage BASIC interpreters or emulators:
 
 ```bash
 # Example with a BASIC interpreter
-basic tests/phase5/bas/test_simple_halt.bas
+sudo apt install bwbasic
+bwbasic tests/phase5/bas/test_simple_halt.bas
 ```
 
 ## Success Criteria
