@@ -81,6 +81,14 @@ public class TestSPL {
         SymbolTable symTable = builder.getSymbolTable();
         symTable.print();
 
+        // Test looking up parameter 'a'
+        Symbol aSymbol = symTable.lookupVariableInAllScopes("a");
+        System.err.println("Lookup for 'a': " + aSymbol);
+
+        // Test looking up parameter 'b'  
+        Symbol bSymbol = symTable.lookupVariableInAllScopes("b");
+        System.err.println("Lookup for 'b': " + bSymbol);
+
         // Print violations
         List<String> violations = builder.getViolations();
         System.out.println("\n=== Semantic Analysis Report ===");
@@ -129,15 +137,6 @@ public class TestSPL {
 
                 Files.write(Paths.get(basicOutputFile), basicCode.getBytes());
                 System.out.println("\nExecutable BASIC code written to: " + basicOutputFile);
-                
-                // Print label mapping for debugging
-                Map<String, Integer> labelMapping = basicGen.getLabelMapping();
-                if (!labelMapping.isEmpty()) {
-                    System.out.println("\n=== Label to Line Number Mapping ===");
-                    for (Map.Entry<String, Integer> entry : labelMapping.entrySet()) {
-                        System.out.println(entry.getKey() + " -> Line " + entry.getValue());
-                    }
-                }
                 
             } catch (Exception e) {
                 System.out.println("✗ Code generation failed:");

@@ -3,16 +3,15 @@ package com.spl;
 import java.util.*;
 
 public class SymbolTable {
-    // each scope maps nodeId -> symbol
+    // Active scopes (for building phase)
     private final Deque<Map<Integer, Symbol>> scopes = new ArrayDeque<>();
     private final Deque<String> scopeNames = new ArrayDeque<>();
-
-    // for name-based look up: node names -> list of symbols in current scope
     private final Deque<Map<String, List<Symbol>>> nameMaps = new ArrayDeque<>();
 
-    // all scopes for printing
+    // All scopes for code generation phase (NEW)
     private final List<Map<Integer, Symbol>> allScopes = new ArrayList<>();
     private final List<String> allScopeNames = new ArrayList<>();
+    private final List<Map<String, List<Symbol>>> allNameMaps = new ArrayList<>();
 
     // track variable usages (node id -> symbol it refers to)
     private final Map<Integer, Symbol> variableUsages = new HashMap<>();
@@ -28,14 +27,17 @@ public class SymbolTable {
         nameMaps.push(newNameMap);
         scopeNames.push(scopeName);
 
+        // Also add to all scopes for code generation
         allScopes.add(newScope);
         allScopeNames.add(scopeName);
+        allNameMaps.add(newNameMap);
     }
 
     public void exitScope() {
         scopes.pop();
         nameMaps.pop();
         scopeNames.pop();
+        // Note: we DON'T remove from allScopes - they're preserved for code generation
     }
 
     public String currentScopeName() {
@@ -50,7 +52,8 @@ public class SymbolTable {
     }
 
     public Symbol lookupByNodeId(int nodeId) {
-        for (Map<Integer, Symbol> scope : scopes) {
+        // Search all scopes (including exited ones)
+        for (Map<Integer, Symbol> scope : allScopes) {
             if (scope.containsKey(nodeId)) {
                 return scope.get(nodeId);
             }
@@ -59,7 +62,8 @@ public class SymbolTable {
     }
 
     public Symbol lookupVariableInAllScopes(String varName) {
-        for (Map<String, List<Symbol>> nameMap : nameMaps) {
+        // Search all name maps (including exited scopes)
+        for (Map<String, List<Symbol>> nameMap : allNameMaps) {
             if (nameMap.containsKey(varName)) {
                 List<Symbol> symbols = nameMap.get(varName);
                 if (!symbols.isEmpty()) {
@@ -70,20 +74,17 @@ public class SymbolTable {
         return null;
     }
 
+    // Rest of your existing methods remain the same...
     public Map<String, List<Symbol>> getNameMapForCurrentScope() {
         return nameMaps.peek();
     }
 
     public Map<String, List<Symbol>> getGlobalScopeSymbols() {
-        if (nameMaps.isEmpty()) {
+        if (allNameMaps.isEmpty()) {
             return new HashMap<>();
         }
-        // The last element in the deque is the global scope
-        Deque<Map<String, List<Symbol>>> temp = new ArrayDeque<>(nameMaps);
-        while (temp.size() > 1) {
-            temp.pop();
-        }
-        return temp.peek();
+        // The first element in allNameMaps is the global scope
+        return allNameMaps.get(0);
     }
 
     public void recordVariableUsage(int nodeId, Symbol symbol) {
@@ -103,5 +104,26 @@ public class SymbolTable {
                 System.out.println("  " + s);
             }
         }
+    }
+
+    // NEW: Method to get all name maps for code generation
+    public List<Map<String, List<Symbol>>> getAllNameMaps() {
+        return allNameMaps;
+    }
+
+    // NEW: Method to find symbol by name and scope
+    public Symbol lookupVariableInScope(String varName, String scopeName) {
+        for (int i = 0; i < allScopeNames.size(); i++) {
+            if (allScopeNames.get(i).equals(scopeName)) {
+                Map<String, List<Symbol>> nameMap = allNameMaps.get(i);
+                if (nameMap.containsKey(varName)) {
+                    List<Symbol> symbols = nameMap.get(varName);
+                    if (!symbols.isEmpty()) {
+                        return symbols.get(symbols.size() - 1);
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

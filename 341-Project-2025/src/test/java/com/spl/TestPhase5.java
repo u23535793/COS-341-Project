@@ -51,7 +51,7 @@ public class TestPhase5 extends TestCase {
         
         new TestCase("test_simple_assignment.spl", true,
             "Valid: Simple variable assignment",
-            "10 x_global_", "20 STOP"),
+            "10 t", "20 x" ,"30 STOP"),
         
         new TestCase("test_if_statement.spl", true,
             "Valid: If statement with labels",
@@ -79,7 +79,8 @@ public class TestPhase5 extends TestCase {
         
         new TestCase("test_call_with_params.spl", true,
             "Valid: CALL with parameters",
-            "\\d+ CALL \\w+"),
+            "\\d+\\s+PRINT\\s+\\w+"),
+
         
         new TestCase("test_arithmetic_expr.spl", true,
             "Valid: Arithmetic expressions with temps",

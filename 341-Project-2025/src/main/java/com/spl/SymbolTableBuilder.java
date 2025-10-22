@@ -51,19 +51,13 @@ public class SymbolTableBuilder extends SPLBaseVisitor<Void> {
         // Get the global scope symbols
         Map<String, List<Symbol>> globalSymbols = symTable.getGlobalScopeSymbols();
         
-        System.err.println("[DEBUG] Checking for duplicate '" + name + "' in global scope");
-        System.err.println("[DEBUG] Global symbols available: " + globalSymbols.keySet());
-        
         if (globalSymbols.containsKey(name)) {
             for (Symbol s : globalSymbols.get(name)) {
-                System.err.println("[DEBUG]   Found symbol: " + s.kind + " '" + s.name + "' in scope '" + s.scope + "'");
                 if (("func".equals(s.kind) || "proc".equals(s.kind)) && "global".equals(s.scope)) {
-                    System.err.println("[DEBUG] >>> DUPLICATE DETECTED!");
                     return true;
                 }
             }
         }
-        System.err.println("[DEBUG] No duplicate found");
         return false;
     }
 
@@ -126,16 +120,12 @@ public class SymbolTableBuilder extends SPLBaseVisitor<Void> {
             for (Symbol s : globalSymbols.get(name)) {
                 // Only add if it's actually in the global scope
                 if (!"global".equals(s.scope)) continue;
-                
-                System.err.println("[DEBUG GLOBAL] Found " + s.kind + " '" + s.name + "' in scope " + s.scope);
-                
+      
                 if ("var".equals(s.kind)) varNames.add(name);
                 else if ("func".equals(s.kind)) funcNames.add(name);
                 else if ("proc".equals(s.kind)) procNames.add(name);
             }
         }
-
-        System.err.println("[DEBUG GLOBAL] Vars: " + varNames + ", Funcs: " + funcNames + ", Procs: " + procNames);
 
         // Check conflicts - only exact name matches
         for (String var : varNames) {
