@@ -1,0 +1,62 @@
+glob { a b c result temp }
+
+proc {
+    myproc(x y) {
+        local { t }
+        t = (x plus y);
+        print t
+    }
+}
+
+func {
+    add(x y) {
+        local { sum }
+        sum = (x plus y);
+        return sum
+    }
+    subtract(x y) {
+        local { diff }
+        diff = (x minus y);
+        return diff
+    }
+    multiply(x y) {
+        local { prod }
+        prod = (x mult y);
+        return prod
+    }
+}
+
+main {
+    var { }
+    
+    a = 10;
+    b = 5;
+    c = 2;
+    
+    result = add(a b);
+    print result;
+    
+    result = subtract(a b);
+    print result;
+    
+    result = multiply(a c);
+    print result;
+    
+    if (a > b) {
+        temp = 1;
+        print temp
+    } else {
+        temp = 0;
+        print temp
+    };
+    
+    myproc(a b);
+    
+    c = 3;
+    while (c > 0) {
+        print c;
+        c = (c minus 1)
+    };
+    
+    halt
+}

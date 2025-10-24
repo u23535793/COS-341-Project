@@ -264,3 +264,27 @@ After Phase 5:
 ---
 
 **Phase 5 Complete!** SPL compiler now generates executable BASIC code.
+
+## How to run the production main:
+1. Place the spl.txt files you would like to run in the Input directory.
+2. Run the production main:
+```bash
+mvn exec:java "-Dexec.mainClass=com.spl.App"
+```
+3. Select which file you would like to run (The number assigned to that file in the printed list)
+4. Output will be generated in: ```Output/<InputFileName>/<InputFileName>.bas ``` for Basic code and ```Output/<InputFileName>/<InputFileName>.html``` for intermediate code.
+
+
+# How to build to jar:
+1. Build the jar:
+```bash
+mvn clean package
+```
+
+2. The built jar file will be in:
+```target/341-Project-2025-1.0-SNAPSHOT.jar```
+
+3. Move that file to root dir (Same as this readme)
+
+4. Run the built jar using:
+``` java -jar 341-Project-2025-1.0-SNAPSHOT.jar ```

@@ -26,13 +26,11 @@ public class SymbolTableBuilder extends SPLBaseVisitor<Void> {
 
     private void addViolation(String message) {
         violations.add(message);
-        System.err.println("[VIOLATION] " + message);
     }
 
     private void addUndeclaredError(String varName, String scope) {
         String message = String.format("Undeclared variable '%s' in scope '%s'", varName, scope);
         violations.add(message);
-        System.err.println("[ERROR] " + message);
     }
 
     private boolean isNameInCurrentScope(String name, String kind) {

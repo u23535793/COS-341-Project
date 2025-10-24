@@ -25,13 +25,6 @@ public class TestPhase5 extends TestCase {
         String description;
         List<String> expectedPatterns; // Patterns to check in output
 
-        TestCase(String filename, boolean expectSuccess, String description) {
-            this.filename = filename;
-            this.expectSuccess = expectSuccess;
-            this.description = description;
-            this.expectedPatterns = new ArrayList<>();
-        }
-
         TestCase(String filename, boolean expectSuccess, String description, String... patterns) {
             this.filename = filename;
             this.expectSuccess = expectSuccess;
@@ -47,7 +40,7 @@ public class TestPhase5 extends TestCase {
         
         new TestCase("test_print_literal.spl", true,
             "Valid: Print literal string",
-            "10 PRINT", "20 STOP"),
+            "10 t", "20 PRINT", "30 STOP"),
         
         new TestCase("test_simple_assignment.spl", true,
             "Valid: Simple variable assignment",

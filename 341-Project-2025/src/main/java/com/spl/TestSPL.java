@@ -44,7 +44,7 @@ public class TestSPL {
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void Main(String[] args) throws Exception {
         String inputFile = args.length > 0 ? args[0] : "test.spl";
         CharStream input = CharStreams.fromFileName(inputFile);
 

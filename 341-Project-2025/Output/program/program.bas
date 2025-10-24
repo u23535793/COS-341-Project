@@ -1,0 +1,64 @@
+10 t1 = 10
+20 a4 = t1
+30 t2 = 5
+40 b7 = t2
+50 t3 = 2
+60 c10 = t3
+70 t4 = a4
+80 t5 = b7
+90 t6 = t4 + t5
+100 sum91 = t6
+110 result13 = sum91
+120 t7 = result13
+130 PRINT t7
+140 t8 = a4
+150 t9 = b7
+160 t10 = t8 - t9
+170 diff136 = t10
+180 result13 = diff136
+190 t11 = result13
+200 PRINT t11
+210 t12 = a4
+220 t13 = c10
+230 t14 = t12 * t13
+240 prod181 = t14
+250 result13 = prod181
+260 t15 = result13
+270 PRINT t15
+280 t16 = a4
+290 t17 = b7
+300 IF t16 > t17 THEN 360
+310 t18 = 0
+320 temp16 = t18
+330 t19 = temp16
+340 PRINT t19
+350 GOTO 410
+360 REM L1
+370 t20 = 1
+380 temp16 = t20
+390 t21 = temp16
+400 PRINT t21
+410 REM L2
+420 t22 = a4
+430 t23 = b7
+440 t24 = t22 + t23
+450 t39 = t24
+460 t25 = t39
+470 PRINT t25
+480 t26 = 3
+490 c10 = t26
+500 REM L3
+510 t27 = c10
+520 t28 = 0
+530 IF t27 > t28 THEN 550
+540 GOTO 630
+550 REM L4
+560 t29 = c10
+570 PRINT t29
+580 t30 = c10
+590 t31 = 1
+600 t32 = t30 - t31
+610 c10 = t32
+620 GOTO 500
+630 REM L5
+640 STOP

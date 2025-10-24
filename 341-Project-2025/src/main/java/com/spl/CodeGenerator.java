@@ -119,19 +119,23 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
         if (ctx.HALT() != null) {
             return "STOP";
         } else if (ctx.PRINT() != null && ctx.output() != null) {
-            String output = visit(ctx.output());
-            return "PRINT " + output;
+          StringBuilder printCode = new StringBuilder();
+          termCode.setLength(0);
+
+          String output = visit(ctx.output());
+
+          String temp = newTemp();
+          printCode.append(temp).append(" = ").append(output).append("\n");
+          printCode.append("PRINT ").append(temp);
+
+          return printCode.toString();
         } else if (ctx.name() != null && ctx.input() != null) {
             String procName = ctx.name().getText();
             SPLParser.PdefContext pdef = procedureSubtrees.get(procName);
-            if (pdef != null) {
-                return inlineProcedureCall(pdef, ctx.input());
+            if (pdef == null) {
+                throw new RuntimeException("Undefined procedure: " + procName);
             }
-            String params = visit(ctx.input());
-            if (params.isEmpty()) {
-                return "CALL " + procName;
-            }
-            return "CALL " + procName + " " + params;
+            return inlineProcedureCall(pdef, ctx.input());
         } else if (ctx.assign() != null) {
             return visit(ctx.assign());
         } else if (ctx.loop() != null) {
@@ -149,14 +153,10 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
             String internalVar = getInternalName(varName);
             String funcName = ctx.name().getText();
             SPLParser.FdefContext fdef = functionSubtrees.get(funcName);
-            if (fdef != null) {
-                return inlineFunctionCall(fdef, ctx.input(), internalVar);
+            if (fdef == null) {
+                throw new RuntimeException("Undefined function: " + funcName);
             }
-            String params = visit(ctx.input());
-            if (params.isEmpty()) {
-                return internalVar + " = CALL " + funcName;
-            }
-            return internalVar + " = CALL " + funcName + " " + params;
+            return inlineFunctionCall(fdef, ctx.input(), internalVar);
         } else if (ctx.term() != null) {
             String varName = ctx.var().getText();
             String internalVar = getInternalName(varName);

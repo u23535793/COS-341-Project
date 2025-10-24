@@ -13,7 +13,6 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
     private static final String TYPE_NUMERIC = "numeric";
     private static final String TYPE_BOOLEAN = "boolean";
     private static final String TYPE_COMPARISON = "comparison";
-    private static final String TYPE_TYPELESS = "typeless";
 
     public TypeAnalyzer(SPLParser parser, Map<ParseTree, Integer> nodeIDs, SymbolTable symTable) {
         this.parser = parser;
@@ -27,11 +26,6 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
 
     private void addTypeError(String message) {
         typeErrors.add(message);
-        System.err.println("[TYPE ERROR] " + message);
-    }
-
-    private void addTypeInfo(String message) {
-        System.err.println("[TYPE INFO] " + message);
     }
 
     private boolean isNumericType(String type) {
@@ -44,10 +38,6 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
 
     private boolean isComparisonType(String type) {
         return TYPE_COMPARISON.equals(type);
-    }
-
-    private boolean isTypeless(String type) {
-        return TYPE_TYPELESS.equals(type);
     }
 
     @Override
