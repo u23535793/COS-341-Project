@@ -1,4 +1,5 @@
 # SPL Compiler
+## Type A completeness
 
 This is a simple SPL compiler that generates executable BASIC code from SPL source files.
 

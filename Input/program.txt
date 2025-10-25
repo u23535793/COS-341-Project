@@ -21,7 +21,10 @@ func {
     }
     multiply(x y) {
         local { prod }
+        print x;
+        print y;
         prod = (x mult y);
+        print prod;
         return prod
     }
 }
@@ -42,7 +45,7 @@ main {
     result = multiply(a c);
     print result;
     
-    if (a < b) {
+    if (a > b) {
         temp = 1;
         print temp
     } else {
