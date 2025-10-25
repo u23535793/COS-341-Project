@@ -127,6 +127,7 @@ binop
     | MINUS
     | MULT
     | DIV
+    | LT
     ;
 
 // ===============================
@@ -152,6 +153,7 @@ NEG     : 'neg';
 NOT     : 'not';
 EQ      : 'eq';
 GT      : '>';
+LT      : '<';        // ADD THIS LINE
 OR      : 'or';
 AND     : 'and';
 PLUS    : 'plus';

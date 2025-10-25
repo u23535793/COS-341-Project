@@ -120,7 +120,7 @@ public class App {
             String basicCode = basicGen.generate();
             System.out.println("Executable BASIC code generated successfully.");
 
-            Path basFile = outputDir.resolve(baseName + ".bas");
+            Path basFile = outputDir.resolve(baseName + ".txt");
             Files.write(basFile, basicCode.getBytes());
             System.out.println("Executable BASIC code written to " + basFile);
 

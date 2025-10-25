@@ -33,7 +33,7 @@ You will be presented with a list of available SPL files in the `Input` director
 * The generated BASIC code will be saved in:
 
 ```
-Output/<InputFileName>/<InputFileName>.bas
+Output/<InputFileName>/<InputFileName>.txt
 ```
 * The Intermediatecode.html will be saved in:
 ```
@@ -43,7 +43,7 @@ Output/<InputFileName>/<InputFileName>.html
 For example, compiling `program1.txt` will produce:
 
 ```
-Output/program1/program1.bas
+Output/program1/program1.txt
 Output/program1/program1.html
 ```
 

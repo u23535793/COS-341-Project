@@ -42,7 +42,7 @@ main {
     result = multiply(a c);
     print result;
     
-    if (a > b) {
+    if (a < b) {
         temp = 1;
         print temp
     } else {

@@ -1,7 +1,10 @@
 package com.spl;
 
-import org.antlr.v4.runtime.tree.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.antlr.v4.runtime.tree.ParseTree;
 
 public class TypeAnalyzer extends SPLBaseVisitor<String> {
     private final SymbolTable symTable;
@@ -424,7 +427,7 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
 
     @Override
     public String visitBinop(SPLParser.BinopContext ctx) {
-        if (ctx.GT() != null || ctx.EQ() != null) {
+        if (ctx.GT() != null || ctx.EQ() != null || ctx.LT() != null) {  // Add ctx.LT() here
             return TYPE_COMPARISON;
         } else if (ctx.OR() != null || ctx.AND() != null) {
             return TYPE_BOOLEAN;

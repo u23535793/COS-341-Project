@@ -1,0 +1,16 @@
+10 t1 = 0
+20 x4 = t1
+30 REM L1
+40 t2 = x4
+50 t3 = 10
+60 IF t2 < t3 THEN 80
+70 GOTO 160
+80 REM L2
+90 t4 = x4
+100 PRINT t4
+110 t5 = x4
+120 t6 = 1
+130 t7 = t5 + t6
+140 x4 = t7
+150 GOTO 30
+160 REM L3

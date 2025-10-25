@@ -133,7 +133,7 @@ public class TestSPL {
                 Files.createDirectories(Paths.get(basicOutputFolder));
 
                 String fileName = Paths.get(inputFile).getFileName().toString();
-                String basicOutputFile = basicOutputFolder + fileName.replace(".spl", ".bas");
+                String basicOutputFile = basicOutputFolder + fileName.replace(".spl", ".txt");
 
                 Files.write(Paths.get(basicOutputFile), basicCode.getBytes());
                 System.out.println("\nExecutable BASIC code written to: " + basicOutputFile);
