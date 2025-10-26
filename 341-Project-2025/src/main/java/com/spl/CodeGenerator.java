@@ -4,13 +4,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 public class CodeGenerator extends SPLBaseVisitor<String> {
     private final SPLParser.Spl_progContext tree;
     private final SymbolTable symTable;
     private final StringBuilder code = new StringBuilder();
     private int tempCounter = 1;
+    private char tempPrefix = 't';
     private int labelCounter = 1;
+    
+    private final Stack<String> availableTemps = new Stack<>();
+    private final List<String> allTemps = new ArrayList<>();
+    
+    private final Map<String, String> variableNameMap = new HashMap<>();
+    private final java.util.Set<String> usedNames = new java.util.HashSet<>();
     
     private String currentScope = "global";
     
@@ -27,14 +35,61 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
     public String generate() {
         code.setLength(0);
         tempCounter = 1;
+        tempPrefix = 't';
         labelCounter = 1;
         currentScope = "global";
+        availableTemps.clear();
+        allTemps.clear();
+        variableNameMap.clear();
+        usedNames.clear();
+        
+        for (char c = 't'; c <= 'z'; c++) {
+            for (int i = 1; i <= 9; i++) {
+                usedNames.add(String.valueOf(c) + i);
+            }
+        }
+        
         visit(tree);
         return code.toString();
     }
     
     private String getInternalName(Symbol sym) {
-        return sym.name + sym.nodeId;
+        String original = sym.name + sym.nodeId;
+        
+        if (variableNameMap.containsKey(original)) {
+            return variableNameMap.get(original);
+        }
+        
+        String shortened = generateShortenedName(sym.name);
+        variableNameMap.put(original, shortened);
+        usedNames.add(shortened);
+        
+        return shortened;
+    }
+    
+    private String generateShortenedName(String originalName) {
+        char firstChar = Character.toLowerCase(originalName.charAt(0));
+        
+        if (firstChar >= 't' && firstChar <= 'z') {
+            firstChar = 'a';
+        }
+        
+        for (int i = 1; i <= 9; i++) {
+            String candidate = String.valueOf(firstChar) + i;
+            if (!usedNames.contains(candidate)) {
+                return candidate;
+            }
+        }
+        for (char c = 'a'; c <= 's'; c++) {
+            for (int i = 1; i <= 9; i++) {
+                String candidate = String.valueOf(c) + i;
+                if (!usedNames.contains(candidate)) {
+                    return candidate;
+                }
+            }
+        }
+        
+        throw new RuntimeException("Exhausted all possible variable names for: " + originalName);
     }
     
     private String getInternalName(String varName) {
@@ -46,7 +101,29 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
     }
     
     private String newTemp() {
-        return "t" + (tempCounter++);
+        if (!availableTemps.isEmpty()) {
+            return availableTemps.pop();
+        }
+        
+        if (tempCounter > 9) {
+            tempCounter = 1;
+            tempPrefix++;
+            if (tempPrefix > 'z') {
+                throw new RuntimeException("Exhausted all temporary variable names");
+            }
+        }
+        
+        String temp = tempPrefix + String.valueOf(tempCounter);
+        tempCounter++;
+        allTemps.add(temp);
+        return temp;
+    }
+    
+    private void releaseTemp(String temp) {
+        // Only release if it's actually a temp variable we created
+        if (allTemps.contains(temp) && !availableTemps.contains(temp)) {
+            availableTemps.push(temp);
+        }
     }
     
     private String newLabel() {
@@ -129,6 +206,8 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
           String temp = newTemp();
           printCode.append(temp).append(" = ").append(output).append("\n");
           printCode.append("PRINT ").append(temp);
+          
+          releaseTemp(temp);
 
           return printCode.toString();
         } else if (ctx.name() != null && ctx.input() != null) {
@@ -171,6 +250,8 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
                 assignCode.append(termCode);
             }
             assignCode.append(internalVar).append(" = ").append(resultTemp);
+            
+            // Don't release the result temp if it's used in assignment
             
             return assignCode.toString();
         }
@@ -228,7 +309,6 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
                 }
                 branchCode.append("REM ").append(labelExit);
             } else {
-                // For normal if-only: IF condition THEN execute_body ELSE skip_to_exit
                 branchCode.append("IF ").append(condition).append(" THEN ").append(labelThen).append("\n");
                 branchCode.append("GOTO ").append(labelExit).append("\n");
                 branchCode.append("REM ").append(labelThen).append("\n");
@@ -312,6 +392,7 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
             if (op.equals("-")) {
                 String temp = newTemp();
                 termCode.append(temp).append(" = -").append(innerTemp).append("\n");
+                releaseTemp(innerTemp);
                 return temp;
             } else if (op.equals("not")) {
                 String labelTrue = newLabel();
@@ -323,6 +404,7 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
                 termCode.append("GOTO ").append(labelEnd).append("\n");
                 termCode.append("REM ").append(labelTrue).append("\n");
                 termCode.append("REM ").append(labelEnd).append("\n");
+                releaseTemp(innerTemp);
                 return temp;
             }
         }
@@ -336,10 +418,13 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
             if (op.equals("+") || op.equals("-") || op.equals("*") || op.equals("/")) {
                 String temp = newTemp();
                 termCode.append(temp).append(" = ").append(leftTemp).append(" ").append(op).append(" ").append(rightTemp).append("\n");
+                releaseTemp(leftTemp);
+                releaseTemp(rightTemp);
                 return temp;
             }
             
             // For comparisons in conditions, return the comparison directly
+            // Note: We keep temps alive for use in the IF statement
             if (op.equals("=") || op.equals(">")) {
                 return leftTemp + " " + op + " " + rightTemp;
             }
@@ -359,6 +444,8 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
                 termCode.append("REM ").append(labelTrue).append("\n");
                 termCode.append(temp).append(" = 1\n");
                 termCode.append("REM ").append(labelEnd).append("\n");
+                releaseTemp(leftTemp);
+                releaseTemp(rightTemp);
                 return temp;
             }
             
@@ -371,6 +458,8 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
                 termCode.append("IF ").append(rightTemp).append(" THEN ").append(labelEnd).append("\n");
                 termCode.append(temp).append(" = 0\n");
                 termCode.append("REM ").append(labelEnd).append("\n");
+                releaseTemp(leftTemp);
+                releaseTemp(rightTemp);
                 return temp;
             }
         }
@@ -393,6 +482,7 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
             if (op.equals("-")) {
                 String temp = newTemp();
                 termCode.append(temp).append(" = -").append(innerTemp).append("\n");
+                releaseTemp(innerTemp);
                 return temp;
             } else if (op.equals("not")) {
                 String labelTrue = newLabel();
@@ -404,6 +494,7 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
                 termCode.append("GOTO ").append(labelEnd).append("\n");
                 termCode.append("REM ").append(labelTrue).append("\n");
                 termCode.append("REM ").append(labelEnd).append("\n");
+                releaseTemp(innerTemp);
                 return temp;
             }
         }
@@ -417,6 +508,8 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
             if (op.equals("+") || op.equals("-") || op.equals("*") || op.equals("/")) {
                 String temp = newTemp();
                 termCode.append(temp).append(" = ").append(leftTemp).append(" ").append(op).append(" ").append(rightTemp).append("\n");
+                releaseTemp(leftTemp);
+                releaseTemp(rightTemp);
                 return temp;
             }
             
@@ -431,6 +524,8 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
                 termCode.append("REM ").append(labelTrue).append("\n");
                 termCode.append(temp).append(" = 1\n");
                 termCode.append("REM ").append(labelEnd).append("\n");
+                releaseTemp(leftTemp);
+                releaseTemp(rightTemp);
                 return temp;
             }
             
@@ -449,6 +544,8 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
                 termCode.append("REM ").append(labelTrue).append("\n");
                 termCode.append(temp).append(" = 1\n");
                 termCode.append("REM ").append(labelEnd).append("\n");
+                releaseTemp(leftTemp);
+                releaseTemp(rightTemp);
                 return temp;
             }
             
@@ -461,6 +558,8 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
                 termCode.append("IF ").append(rightTemp).append(" THEN ").append(labelEnd).append("\n");
                 termCode.append(temp).append(" = 0\n");
                 termCode.append("REM ").append(labelEnd).append("\n");
+                releaseTemp(leftTemp);
+                releaseTemp(rightTemp);
                 return temp;
             }
         }

@@ -1,70 +1,70 @@
 10 t1 = 10
-20 a4 = t1
+20 a1 = t1
 30 t2 = 5
-40 b7 = t2
+40 b1 = t2
 50 t3 = 2
-60 c10 = t3
-70 t4 = a4
-80 t5 = b7
+60 c1 = t3
+70 t4 = a1
+80 t5 = b1
 90 t6 = t4 + t5
-100 sum91 = t6
-110 result13 = sum91
-120 t7 = result13
-130 PRINT t7
-140 t8 = a4
-150 t9 = b7
-160 t10 = t8 - t9
-170 diff136 = t10
-180 result13 = diff136
-190 t11 = result13
-200 PRINT t11
-210 t12 = a4
-220 PRINT t12
-230 t13 = c10
-240 PRINT t13
-250 t14 = a4
-260 t15 = c10
-270 t16 = t14 * t15
-280 prod181 = t16
-290 t17 = prod181
-300 PRINT t17
-310 result13 = prod181
-320 t18 = result13
-330 PRINT t18
-340 t19 = a4
-350 t20 = b7
-360 IF t19 > t20 THEN 420
-370 t21 = 0
-380 temp16 = t21
-390 t22 = temp16
-400 PRINT t22
+100 s1 = t6
+110 r1 = s1
+120 t5 = r1
+130 PRINT t5
+140 t5 = a1
+150 t4 = b1
+160 t7 = t5 - t4
+170 d1 = t7
+180 r1 = d1
+190 t4 = r1
+200 PRINT t4
+210 t4 = a1
+220 PRINT t4
+230 t4 = c1
+240 PRINT t4
+250 t4 = a1
+260 t5 = c1
+270 t8 = t4 * t5
+280 p1 = t8
+290 t5 = p1
+300 PRINT t5
+310 r1 = p1
+320 t5 = r1
+330 PRINT t5
+340 t5 = a1
+350 t4 = b1
+360 IF t5 > t4 THEN 420
+370 t9 = 0
+380 a4 = t9
+390 u1 = a4
+400 PRINT u1
 410 GOTO 470
 420 REM L1
-430 t23 = 1
-440 temp16 = t23
-450 t24 = temp16
-460 PRINT t24
+430 u1 = 1
+440 a4 = u1
+450 u2 = a4
+460 PRINT u2
 470 REM L2
-480 t25 = a4
-490 t26 = b7
-500 t27 = t25 + t26
-510 t39 = t27
-520 t28 = t39
-530 PRINT t28
-540 t29 = 3
-550 c10 = t29
+480 u2 = a1
+490 u3 = b1
+500 u4 = u2 + u3
+510 a5 = u4
+520 u3 = a5
+530 PRINT u3
+540 u3 = 3
+550 c1 = u3
 560 REM L3
-570 t30 = c10
-580 t31 = 0
-590 IF t30 > t31 THEN 610
+570 u2 = c1
+580 u5 = 0
+590 IF u2 > u5 THEN 610
 600 GOTO 690
 610 REM L4
-620 t32 = c10
-630 PRINT t32
-640 t33 = c10
-650 t34 = 1
-660 t35 = t33 - t34
-670 c10 = t35
+620 u6 = c1
+630 PRINT u6
+640 u6 = c1
+650 u7 = 1
+660 u8 = u6 - u7
+670 c1 = u8
 680 GOTO 560
 690 REM L5
 700 STOP

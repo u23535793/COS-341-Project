@@ -44,7 +44,7 @@ public class TestPhase5 extends TestCase {
         
         new TestCase("test_simple_assignment.spl", true,
             "Valid: Simple variable assignment",
-            "10 t", "20 x" ,"30 STOP"),
+            "10 t", "20 a" ,"30 STOP"),
         
         new TestCase("test_if_statement.spl", true,
             "Valid: If statement with labels",
