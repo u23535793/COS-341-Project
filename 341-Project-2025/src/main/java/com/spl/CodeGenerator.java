@@ -340,7 +340,7 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
             }
             
             // For comparisons in conditions, return the comparison directly
-            if (op.equals("=") || op.equals(">") || op.equals("<")) {
+            if (op.equals("=") || op.equals(">")) {
                 return leftTemp + " " + op + " " + rightTemp;
             }
             
@@ -421,7 +421,7 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
             }
             
             // For comparisons in assignments, evaluate to boolean temp
-            if (op.equals("=") || op.equals(">") || op.equals("<")) {
+            if (op.equals("=") || op.equals(">")) {
                 String labelTrue = newLabel();
                 String labelEnd = newLabel();
                 String temp = newTemp();
@@ -525,7 +525,6 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
     public String visitBinop(SPLParser.BinopContext ctx) {
         if (ctx.EQ() != null) return "=";
         if (ctx.GT() != null) return ">";
-        if (ctx.LT() != null) return "<";  // Add this line
         if (ctx.PLUS() != null) return "+";
         if (ctx.MINUS() != null) return "-";
         if (ctx.MULT() != null) return "*";

@@ -427,7 +427,7 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
 
     @Override
     public String visitBinop(SPLParser.BinopContext ctx) {
-        if (ctx.GT() != null || ctx.EQ() != null || ctx.LT() != null) {  // Add ctx.LT() here
+        if (ctx.GT() != null || ctx.EQ() != null) {
             return TYPE_COMPARISON;
         } else if (ctx.OR() != null || ctx.AND() != null) {
             return TYPE_BOOLEAN;
