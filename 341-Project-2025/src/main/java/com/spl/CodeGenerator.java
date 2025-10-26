@@ -93,7 +93,7 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
     }
     
     private String getInternalName(String varName) {
-        Symbol sym = symTable.lookupVariableInAllScopes(varName);
+        Symbol sym = symTable.lookupVariableLexically(varName, currentScope);
         if (sym != null) {
             return getInternalName(sym);
         }
@@ -601,7 +601,7 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
         }
         if (ctx.var() != null) {
             String varName = ctx.var().getText();
-            Symbol sym = symTable.lookupVariableInAllScopes(varName);
+            Symbol sym = symTable.lookupVariableLexically(varName, currentScope);
             if (sym != null) {
                 return getInternalName(sym);
             }
@@ -665,8 +665,8 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
     private String inlineProcedureCall(SPLParser.PdefContext pdef, SPLParser.InputContext input) {
         StringBuilder inlineCode = new StringBuilder();
         
-        String previousScope = currentScope;
-        currentScope = "myproc";
+    String previousScope = currentScope;
+    currentScope = pdef.name().getText();
         
         List<String> actualParams = new ArrayList<>();
         if (input != null && input.atom() != null) {
@@ -681,7 +681,8 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
             if (maxthree.var() != null) {
                 for (SPLParser.VarContext varCtx : maxthree.var()) {
                     String formalParam = varCtx.getText();
-                    Symbol formalSym = symTable.lookupVariableInAllScopes(formalParam);
+                    // formal parameters live in the procedure's scope
+                    Symbol formalSym = symTable.lookupVariableInScope(formalParam, currentScope);
                     if (formalSym != null) {
                         String internalName = getInternalName(formalSym);
                         formalInternalNames.add(internalName);
@@ -714,8 +715,8 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
     private String inlineFunctionCall(SPLParser.FdefContext fdef, SPLParser.InputContext input, String resultVar) {
         StringBuilder inlineCode = new StringBuilder();
         
-        String previousScope = currentScope;
-        currentScope = fdef.name().getText();
+    String previousScope = currentScope;
+    currentScope = fdef.name().getText();
         
         List<String> actualParams = new ArrayList<>();
         if (input != null && input.atom() != null) {
@@ -730,7 +731,8 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
             if (maxthree.var() != null) {
                 for (SPLParser.VarContext varCtx : maxthree.var()) {
                     String formalParam = varCtx.getText();
-                    Symbol formalSym = symTable.lookupVariableInAllScopes(formalParam);
+                    // formal parameters live in the function's scope
+                    Symbol formalSym = symTable.lookupVariableInScope(formalParam, currentScope);
                     if (formalSym != null) {
                         String internalName = getInternalName(formalSym);
                         formalInternalNames.add(internalName);

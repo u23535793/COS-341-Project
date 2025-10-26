@@ -60,8 +60,9 @@ public class SymbolTableBuilder extends SPLBaseVisitor<Void> {
     }
 
     private Symbol lookupVariableInScope(String varName) {
-        return symTable.lookupVariableInAllScopes(varName);
+        return symTable.lookupVariableLexically(varName, symTable.currentScopeName());
     }
+
 
     @Override
     public Void visitSpl_prog(SPLParser.Spl_progContext ctx) {

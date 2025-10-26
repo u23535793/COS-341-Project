@@ -3,7 +3,7 @@ glob { a b c result temp }
 proc {
     myproc(x y) {
         local { t }
-        t = (x plus y);
+        t = ((x plus y) minus c);
         print t
     }
 }

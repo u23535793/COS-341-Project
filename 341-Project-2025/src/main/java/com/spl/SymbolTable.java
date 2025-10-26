@@ -16,22 +16,32 @@ public class SymbolTable {
     // track variable usages (node id -> symbol it refers to)
     private final Map<Integer, Symbol> variableUsages = new HashMap<>();
 
+    private final Map<String, String> parentScopes = new HashMap<>();
+
+
     public SymbolTable() {
         enterScope("global");
     }
 
     public void enterScope(String scopeName) {
+        enterScope(scopeName, currentScopeName());
+    }
+
+    public void enterScope(String scopeName, String parentScope) {
         Map<Integer, Symbol> newScope = new LinkedHashMap<>();
         Map<String, List<Symbol>> newNameMap = new HashMap<>();
         scopes.push(newScope);
         nameMaps.push(newNameMap);
         scopeNames.push(scopeName);
 
-        // Also add to all scopes for code generation
         allScopes.add(newScope);
         allScopeNames.add(scopeName);
         allNameMaps.add(newNameMap);
+
+        // Track parent relationship
+        parentScopes.put(scopeName, parentScope);
     }
+
 
     public void exitScope() {
         scopes.pop();
@@ -74,7 +84,32 @@ public class SymbolTable {
         return null;
     }
 
-    // Rest of your existing methods remain the same...
+    public Symbol lookupVariableLexically(String varName, String fromScope) {
+        String scope = fromScope;
+
+        while (scope != null) {
+            // Find the scope's index
+            for (int i = 0; i < allScopeNames.size(); i++) {
+                if (allScopeNames.get(i).equals(scope)) {
+                    Map<String, List<Symbol>> nameMap = allNameMaps.get(i);
+                    if (nameMap.containsKey(varName)) {
+                        List<Symbol> symbols = nameMap.get(varName);
+                        if (!symbols.isEmpty()) {
+                            return symbols.get(symbols.size() - 1);
+                        }
+                    }
+                    break;
+                }
+            }
+
+            // Move up to parent scope
+            scope = parentScopes.get(scope);
+        }
+
+        return null;
+    }
+
+
     public Map<String, List<Symbol>> getNameMapForCurrentScope() {
         return nameMaps.peek();
     }

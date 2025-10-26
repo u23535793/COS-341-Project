@@ -19,15 +19,9 @@ r1 = d1
 t4 = r1
 PRINT t4
 t4 = a1
-PRINT t4
-t4 = c1
-PRINT t4
-t4 = a1
 t5 = c1
 t8 = t4 * t5
 p1 = t8
-t5 = p1
-PRINT t5
 r1 = p1
 t5 = r1
 PRINT t5
@@ -48,15 +42,17 @@ REM L2
 u2 = a1
 u3 = b1
 u4 = u2 + u3
-a5 = u4
+u3 = c1
+u2 = u4 - u3
+a5 = u2
 u3 = a5
 PRINT u3
 u3 = 3
 c1 = u3
 REM L3
-u2 = c1
+u4 = c1
 u5 = 0
-IF u2 &gt; u5 THEN L4
+IF u4 &gt; u5 THEN L4
 GOTO L5
 REM L4
 u6 = c1

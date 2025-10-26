@@ -1,9 +1,9 @@
-glob { a b c result temp }
+glob { a b result temp }
 
 proc {
     myproc(x y) {
         local { t }
-        t = (x plus y);
+        t = ((x plus y) minus c);
         print t
     }
 }
@@ -21,16 +21,13 @@ func {
     }
     multiply(x y) {
         local { prod }
-        print x;
-        print y;
         prod = (x mult y);
-        print prod;
         return prod
     }
 }
 
 main {
-    var { }
+    var { c }
     
     a = 10;
     b = 5;

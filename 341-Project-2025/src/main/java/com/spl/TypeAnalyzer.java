@@ -3,6 +3,8 @@ package com.spl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Deque;
+import java.util.ArrayDeque;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 
@@ -21,6 +23,12 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
         this.parser = parser;
         this.nodeIDs = nodeIDs;
         this.symTable = symTable;
+    }
+
+    private final Deque<String> scopeStack = new ArrayDeque<>();
+
+    private String currentScope() {
+        return scopeStack.isEmpty() ? "global" : scopeStack.peek();
     }
 
     public List<String> getTypeErrors() {
@@ -45,11 +53,16 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
 
     @Override
     public String visitSpl_prog(SPLParser.Spl_progContext ctx) {
+        // start in global scope for lexical lookups
+        scopeStack.push("global");
+
         // Visit all sections
         if (ctx.variables() != null) visit(ctx.variables());
         if (ctx.procdefs() != null) visit(ctx.procdefs());
         if (ctx.funcdefs() != null) visit(ctx.funcdefs());
         if (ctx.mainprog() != null) visit(ctx.mainprog());
+
+        scopeStack.pop();
 
         return typeErrors.isEmpty() ? "valid" : "invalid";
     }
@@ -115,18 +128,28 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
     public String visitPdef(SPLParser.PdefContext ctx) {
         String procName = ctx.name().getText();
 
+        // enter procedure scope for lexical lookups
+        scopeStack.push(procName);
+
         // Check parameter types
         if (ctx.param() != null) {
             String paramType = visit(ctx.param());
-            if ("invalid".equals(paramType)) return "invalid";
+            if ("invalid".equals(paramType)) {
+                scopeStack.pop();
+                return "invalid";
+            }
         }
 
         // Check body types
         if (ctx.body() != null) {
             String bodyType = visit(ctx.body());
-            if ("invalid".equals(bodyType)) return "invalid";
+            if ("invalid".equals(bodyType)) {
+                scopeStack.pop();
+                return "invalid";
+            }
         }
 
+        scopeStack.pop();
         return "valid";
     }
 
@@ -134,16 +157,25 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
     public String visitFdef(SPLParser.FdefContext ctx) {
         String funcName = ctx.name().getText();
 
+        // enter function scope for lexical lookups
+        scopeStack.push(funcName);
+
         // Check parameter types
         if (ctx.param() != null) {
             String paramType = visit(ctx.param());
-            if ("invalid".equals(paramType)) return "invalid";
+            if ("invalid".equals(paramType)) {
+                scopeStack.pop();
+                return "invalid";
+            }
         }
 
         // Check body types
         if (ctx.body() != null) {
             String bodyType = visit(ctx.body());
-            if ("invalid".equals(bodyType)) return "invalid";
+            if ("invalid".equals(bodyType)) {
+                scopeStack.pop();
+                return "invalid";
+            }
         }
 
         // Check return atom is numeric
@@ -151,10 +183,12 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
             String atomType = visit(ctx.atom());
             if (!isNumericType(atomType)) {
                 addTypeError("Function '" + funcName + "' must return numeric type, got " + atomType);
+                scopeStack.pop();
                 return "invalid";
             }
         }
 
+        scopeStack.pop();
         return "valid";
     }
 
@@ -177,18 +211,28 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
 
     @Override
     public String visitMainprog(SPLParser.MainprogContext ctx) {
+        // enter main scope
+        scopeStack.push("main");
+
         // Check variables
         if (ctx.variables() != null) {
             String varType = visit(ctx.variables());
-            if ("invalid".equals(varType)) return "invalid";
+            if ("invalid".equals(varType)) {
+                scopeStack.pop();
+                return "invalid";
+            }
         }
 
         // Check algo
         if (ctx.algo() != null) {
             String algoType = visit(ctx.algo());
-            if ("invalid".equals(algoType)) return "invalid";
+            if ("invalid".equals(algoType)) {
+                scopeStack.pop();
+                return "invalid";
+            }
         }
 
+        scopeStack.pop();
         return "valid";
     }
 
@@ -340,12 +384,18 @@ public class TypeAnalyzer extends SPLBaseVisitor<String> {
         if (ctx.var() != null) {
             // Variable atom - look up type from symbol table
             String varName = ctx.var().getText();
-            Symbol symbol = symTable.lookupVariableInAllScopes(varName);
-            
-            if (symbol != null && ("var".equals(symbol.kind) || "param".equals(symbol.kind))) {
+            Symbol symbol = symTable.lookupVariableLexically(varName, currentScope());
+
+            if (symbol == null) {
+                addTypeError("Undeclared variable '" + varName + "' in scope '" + currentScope() + "'");
+                // Return numeric as a safe default to reduce cascade errors
                 return TYPE_NUMERIC;
             }
-            return TYPE_NUMERIC; // Variables are always numeric
+
+            if ("var".equals(symbol.kind) || "param".equals(symbol.kind)) {
+                return TYPE_NUMERIC;
+            }
+            return TYPE_NUMERIC; // fallback
         } else if (ctx.NUMBER() != null) {
             // Number literals are always numeric
             return TYPE_NUMERIC;
