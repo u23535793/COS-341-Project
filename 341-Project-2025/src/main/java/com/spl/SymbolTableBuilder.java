@@ -9,6 +9,8 @@ public class SymbolTableBuilder extends SPLBaseVisitor<Void> {
     private final SPLParser parser;
     private final Map<ParseTree, Integer> nodeIDs;
     private final List<String> violations = new ArrayList<>();
+    private Map<String, SPLParser.PdefContext> procedureDefinitions = new HashMap<>();
+    private Map<String, SPLParser.FdefContext> functionDefinitions = new HashMap<>();
 
     public SymbolTableBuilder(SPLParser parser, Map<ParseTree, Integer> nodeIDs) {
         this.parser = parser;
@@ -159,10 +161,48 @@ public class SymbolTableBuilder extends SPLBaseVisitor<Void> {
     }
 
     @Override
+    public Void visitInstr(SPLParser.InstrContext ctx) {
+        // Check procedure calls
+        if (ctx.name() != null && ctx.input() != null) {
+            String procName = ctx.name().getText();
+            
+            // Look up procedure in global scope
+            Symbol procSym = symTable.lookupVariableInScope(procName, "global");
+            
+            if (procSym != null && "proc".equals(procSym.kind)) {
+                // Find the procedure definition
+                SPLParser.PdefContext pdef = findProcedureDefinition(procName);
+                if (pdef != null) {
+                    int expectedParams = countParameters(pdef.param());
+                    int actualParams = countArguments(ctx.input());
+                    
+                    if (expectedParams != actualParams) {
+                        addViolation(String.format(
+                            "Procedure '%s' expects %d parameter(s) but got %d argument(s)",
+                            procName, expectedParams, actualParams
+                        ));
+                    }
+                }
+            }
+            
+            // Visit the input to check variable declarations
+            if (ctx.input() != null) {
+                visit(ctx.input());
+            }
+        }
+        
+        // Continue with other instruction types...
+        return visitChildren(ctx);
+    }
+
+    @Override
     public Void visitPdef(SPLParser.PdefContext ctx) {
         int id = nodeIDs.get(ctx);
         String name = ctx.name().getText();
         String currentScope = symTable.currentScopeName();
+
+        // Store the definition for later lookup
+        procedureDefinitions.put(name, ctx);
 
         // Check for duplicate procedure declaration in global scope
         if (isGlobalFunctionOrProcedure(name)) {
@@ -195,6 +235,9 @@ public class SymbolTableBuilder extends SPLBaseVisitor<Void> {
         String name = ctx.name().getText();
         String currentScope = symTable.currentScopeName();
 
+        // Store the definition for later lookup
+        functionDefinitions.put(name, ctx);
+
         // Check for duplicate function declaration in global scope
         if (isGlobalFunctionOrProcedure(name)) {
             addViolation("Duplicate function '" + name + "' declaration in scope '" + currentScope + "'");
@@ -218,6 +261,15 @@ public class SymbolTableBuilder extends SPLBaseVisitor<Void> {
 
         symTable.exitScope();
         return null;
+    }
+
+    // Helper methods to retrieve stored definitions
+    private SPLParser.PdefContext findProcedureDefinition(String name) {
+        return procedureDefinitions.get(name);
+    }
+
+    private SPLParser.FdefContext findFunctionDefinition(String name) {
+        return functionDefinitions.get(name);
     }
 
     private Set<String> visitParamAndCollect(SPLParser.ParamContext ctx) {
@@ -354,12 +406,18 @@ public class SymbolTableBuilder extends SPLBaseVisitor<Void> {
 
     @Override
     public Void visitOutput(SPLParser.OutputContext ctx) {
-        // Visit atoms in output
-        if (ctx.atom() != null) {
+        if (ctx.STRING() != null) {
+            String str = ctx.STRING().getText();
+            str = str.substring(1, str.length()-1);
+            if (str.length() > 15) {
+                addViolation("String literal exceeds 15 characters: " + str);
+            }
+        } else if (ctx.atom() != null) {
             visit(ctx.atom());
         }
         return null;
     }
+
 
     @Override
     public Void visitTerm(SPLParser.TermContext ctx) {
@@ -377,7 +435,7 @@ public class SymbolTableBuilder extends SPLBaseVisitor<Void> {
         return null;
     }
 
-    @Override
+    @Override 
     public Void visitAssign(SPLParser.AssignContext ctx) {
         // Check the variable being assigned to
         if (ctx.var() != null) {
@@ -388,13 +446,59 @@ public class SymbolTableBuilder extends SPLBaseVisitor<Void> {
             }
         }
 
-        // Visit the rest (function call or term)
+        // Check function calls
         if (ctx.name() != null && ctx.input() != null) {
+            String funcName = ctx.name().getText();
+            
+            // Look up function in global scope
+            Symbol funcSym = symTable.lookupVariableInScope(funcName, "global");
+            
+            if (funcSym != null && "func".equals(funcSym.kind)) {
+                // Find the function definition
+                SPLParser.FdefContext fdef = findFunctionDefinition(funcName);
+                if (fdef != null) {
+                    int expectedParams = countParameters(fdef.param());
+                    int actualParams = countArguments(ctx.input());
+                    
+                    if (expectedParams != actualParams) {
+                        addViolation(String.format(
+                            "Function '%s' expects %d parameter(s) but got %d argument(s)",
+                            funcName, expectedParams, actualParams
+                        ));
+                    }
+                }
+            }
+            
             visit(ctx.input());
         } else if (ctx.term() != null) {
             visit(ctx.term());
         }
 
         return null;
+    }
+
+    // Helper method to count parameters
+    private int countParameters(SPLParser.ParamContext paramCtx) {
+        if (paramCtx == null || paramCtx.maxthree() == null) {
+            return 0;
+        }
+        
+        int count = 0;
+        if (paramCtx.maxthree().children != null) {
+            for (ParseTree child : paramCtx.maxthree().children) {
+                if (child instanceof SPLParser.VarContext) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    // Helper method to count arguments
+    private int countArguments(SPLParser.InputContext inputCtx) {
+        if (inputCtx == null || inputCtx.atom() == null) {
+            return 0;
+        }
+        return inputCtx.atom().size();
     }
 }

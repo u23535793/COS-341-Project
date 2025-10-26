@@ -39,28 +39,30 @@
 390 u2 = a8
 400 PRINT u2
 410 REM L2
-420 u2 = a1
-430 u3 = b1
-440 u4 = u2 + u3
-450 u3 = c1
-460 u2 = u4 - u3
-470 b3 = u2
-480 u3 = b3
-490 PRINT u3
-500 u3 = 3
-510 c1 = u3
-520 REM L3
-530 u4 = c1
-540 u5 = 0
-550 IF u4 > u5 THEN 570
-560 GOTO 650
-570 REM L4
-580 u6 = c1
-590 PRINT u6
-600 u6 = c1
-610 u7 = 1
-620 u8 = u6 - u7
-630 c1 = u8
-640 GOTO 520
-650 REM L5
-660 STOP
+420 u2 = 20
+430 c2 = u2
+440 u3 = a1
+450 u4 = b1
+460 u5 = u3 + u4
+470 u4 = c2
+480 u3 = u5 - u4
+490 b3 = u3
+500 u4 = b3
+510 PRINT u4
+520 u4 = 3
+530 c1 = u4
+540 REM L3
+550 u5 = c1
+560 u6 = 0
+570 IF u5 > u6 THEN 590
+580 GOTO 670
+590 REM L4
+600 u7 = c1
+610 PRINT u7
+620 u7 = c1
+630 u8 = 1
+640 u9 = u7 - u8
+650 c1 = u9
+660 GOTO 540
+670 REM L5
+680 STOP

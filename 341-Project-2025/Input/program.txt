@@ -3,6 +3,7 @@ glob { a b c result temp }
 proc {
     myproc(x y) {
         local { t }
+        c = 20;
         t = ((x plus y) minus c);
         print t
     }
@@ -10,7 +11,7 @@ proc {
 
 func {
     add(x y) {
-        local { sum }
+        local { sum somevar}
         sum = (x plus y);
         return sum
     }
@@ -27,7 +28,7 @@ func {
 }
 
 main {
-    var { }
+    var { c }
     
     a = 10;
     b = 5;

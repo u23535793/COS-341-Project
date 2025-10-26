@@ -1,7 +1,11 @@
 # SPL Compiler
 ## Type A completeness
 
-This is a simple SPL compiler that generates executable BASIC code from SPL source files.
+## Group Members:
+- Sean van der Merwe (u22583387)
+- Karabelo Taole (u23538318)
+- Driya Govender (u23535793)
+- Sibusiso Mngomezulu (u20441984)
 
 ## Directory Structure
 
@@ -50,4 +54,5 @@ Output/program1/program1.html
 
 * The `Output` directory will be created automatically if it doesn’t exist.
 
-* You can then view the intermediate code in a browser and run the basic code in a basic compiler -> We used https://www.calormen.com/jsbasic/ and bwbasic (linux program) to test the output code.
+* You can then view the intermediate code in a browser and run the basic code in a basic compiler -> We used [Applesoft Basic](https://www.calormen.com/jsbasic/) ,[C64 Basic emulator](https://stigc.dk/c64/basic/) and bwbasic (linux program) to test the output code.
+* The Basic compilers we tested with can only use max 2 char long variables, so we implemented smart temp variable assignment and reuse so it never needs to use something like t10, which will end up being defined as t1 in the compiler. User defined variables are also shortened like that, with scope checks to ensure reuse is safe.

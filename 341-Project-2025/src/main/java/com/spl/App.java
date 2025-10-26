@@ -91,6 +91,16 @@ public class App {
                 for (String e : namingErrors) System.out.println("  - " + e);
                 return;
             }
+
+            UninitializedVariableChecker uninitChecker = new UninitializedVariableChecker(parser, nodeIDs, symTable);
+            uninitChecker.visit(tree);
+            List<String> uninitErrors = uninitChecker.getErrors();
+
+            if (!uninitErrors.isEmpty()) {
+                System.out.println("Initialization error:");
+                for (String e : uninitErrors) System.out.println("  - " + e);
+                return;
+            }
             System.out.println("Variable Naming and Function Naming accepted");
             
             // === PHASE 4: TYPE CHECKING =====================================

@@ -2,8 +2,9 @@ glob { a b result temp }
 
 proc {
     myproc(x y) {
-        local { t }
-        t = ((x plus y) minus c);
+        local { t c }
+        c = 20;
+        t = (((x plus y) minus c) mult 2);
         print t
     }
 }

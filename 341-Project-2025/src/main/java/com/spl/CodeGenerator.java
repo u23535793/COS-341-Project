@@ -165,11 +165,17 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
     
     @Override
     public String visitMainprog(SPLParser.MainprogContext ctx) {
+        String previousScope = currentScope;
+        currentScope = "main";
+
+        String result = "";
         if (ctx.algo() != null) {
             String algoCode = visit(ctx.algo());
-            return algoCode != null ? algoCode : "";
+            result = algoCode != null ? algoCode : "";
         }
-        return "";
+
+        currentScope = previousScope;
+        return result;
     }
     
     @Override
@@ -197,19 +203,25 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
     public String visitInstr(SPLParser.InstrContext ctx) {
         if (ctx.HALT() != null) {
             return "STOP";
-        } else if (ctx.PRINT() != null && ctx.output() != null) {
-          StringBuilder printCode = new StringBuilder();
-          termCode.setLength(0);
+                } else if (ctx.PRINT() != null && ctx.output() != null) {
+                    StringBuilder printCode = new StringBuilder();
+                    termCode.setLength(0);
 
-          String output = visit(ctx.output());
+                    String output = visit(ctx.output());
 
-          String temp = newTemp();
-          printCode.append(temp).append(" = ").append(output).append("\n");
-          printCode.append("PRINT ").append(temp);
+                    // If output is a string literal, BASIC cannot assign strings to numeric temps.
+                    // Print the string literal directly instead of creating a temp variable.
+                    if (output != null && output.startsWith("\"") && output.endsWith("\"")) {
+                            return "PRINT " + output;
+                    }
+
+                    String temp = newTemp();
+                    printCode.append(temp).append(" = ").append(output).append("\n");
+                    printCode.append("PRINT ").append(temp);
           
-          releaseTemp(temp);
+                    releaseTemp(temp);
 
-          return printCode.toString();
+                    return printCode.toString();
         } else if (ctx.name() != null && ctx.input() != null) {
             String procName = ctx.name().getText();
             SPLParser.PdefContext pdef = procedureSubtrees.get(procName);
@@ -661,69 +673,22 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
         }
         return "";
     }
-    
-    private String inlineProcedureCall(SPLParser.PdefContext pdef, SPLParser.InputContext input) {
-        StringBuilder inlineCode = new StringBuilder();
-        
-    String previousScope = currentScope;
-    currentScope = pdef.name().getText();
-        
-        List<String> actualParams = new ArrayList<>();
-        if (input != null && input.atom() != null) {
-            for (SPLParser.AtomContext atom : input.atom()) {
-                actualParams.add(visit(atom));
-            }
-        }
-        
-        List<String> formalInternalNames = new ArrayList<>();
-        if (pdef.param() != null && pdef.param().maxthree() != null) {
-            SPLParser.MaxthreeContext maxthree = pdef.param().maxthree();
-            if (maxthree.var() != null) {
-                for (SPLParser.VarContext varCtx : maxthree.var()) {
-                    String formalParam = varCtx.getText();
-                    // formal parameters live in the procedure's scope
-                    Symbol formalSym = symTable.lookupVariableInScope(formalParam, currentScope);
-                    if (formalSym != null) {
-                        String internalName = getInternalName(formalSym);
-                        formalInternalNames.add(internalName);
-                    }
-                }
-            }
-        }
-        
-        Map<String, String> paramMap = new HashMap<>();
-        for (int i = 0; i < formalInternalNames.size() && i < actualParams.size(); i++) {
-            paramMap.put(formalInternalNames.get(i), actualParams.get(i));
-        }
-        
-        if (pdef.body() != null && pdef.body().algo() != null) {
-            String bodyCode = visit(pdef.body().algo());
-            
-            if (!bodyCode.isEmpty()) {
-                for (Map.Entry<String, String> entry : paramMap.entrySet()) {
-                    bodyCode = bodyCode.replace(entry.getKey(), entry.getValue());
-                }
-                inlineCode.append(bodyCode);
-            }
-        }
-        
-        currentScope = previousScope;
-        
-        return inlineCode.toString();
-    }
 
     private String inlineFunctionCall(SPLParser.FdefContext fdef, SPLParser.InputContext input, String resultVar) {
         StringBuilder inlineCode = new StringBuilder();
         
-    String previousScope = currentScope;
-    currentScope = fdef.name().getText();
+        String previousScope = currentScope;
         
+        // IMPORTANT: Evaluate actual parameters in the CALLING scope (before changing scope)
         List<String> actualParams = new ArrayList<>();
         if (input != null && input.atom() != null) {
             for (SPLParser.AtomContext atom : input.atom()) {
                 actualParams.add(visit(atom));
             }
         }
+        
+        // NOW change to the function's scope
+        currentScope = fdef.name().getText();
         
         List<String> formalInternalNames = new ArrayList<>();
         if (fdef.param() != null && fdef.param().maxthree() != null) {
@@ -767,6 +732,59 @@ public class CodeGenerator extends SPLBaseVisitor<String> {
             inlineCode.append(resultVar).append(" = ").append(returnValue);
         } else {
             inlineCode.append(resultVar).append(" = 0");
+        }
+        
+        currentScope = previousScope;
+        
+        return inlineCode.toString();
+    }
+
+    private String inlineProcedureCall(SPLParser.PdefContext pdef, SPLParser.InputContext input) {
+        StringBuilder inlineCode = new StringBuilder();
+        
+        String previousScope = currentScope;
+        
+        // IMPORTANT: Evaluate actual parameters in the CALLING scope (before changing scope)
+        List<String> actualParams = new ArrayList<>();
+        if (input != null && input.atom() != null) {
+            for (SPLParser.AtomContext atom : input.atom()) {
+                actualParams.add(visit(atom));
+            }
+        }
+        
+        // NOW change to the procedure's scope
+        currentScope = pdef.name().getText();
+        
+        List<String> formalInternalNames = new ArrayList<>();
+        if (pdef.param() != null && pdef.param().maxthree() != null) {
+            SPLParser.MaxthreeContext maxthree = pdef.param().maxthree();
+            if (maxthree.var() != null) {
+                for (SPLParser.VarContext varCtx : maxthree.var()) {
+                    String formalParam = varCtx.getText();
+                    // formal parameters live in the procedure's scope
+                    Symbol formalSym = symTable.lookupVariableInScope(formalParam, currentScope);
+                    if (formalSym != null) {
+                        String internalName = getInternalName(formalSym);
+                        formalInternalNames.add(internalName);
+                    }
+                }
+            }
+        }
+        
+        Map<String, String> paramMap = new HashMap<>();
+        for (int i = 0; i < formalInternalNames.size() && i < actualParams.size(); i++) {
+            paramMap.put(formalInternalNames.get(i), actualParams.get(i));
+        }
+        
+        if (pdef.body() != null && pdef.body().algo() != null) {
+            String bodyCode = visit(pdef.body().algo());
+            
+            if (!bodyCode.isEmpty()) {
+                for (Map.Entry<String, String> entry : paramMap.entrySet()) {
+                    bodyCode = bodyCode.replace(entry.getKey(), entry.getValue());
+                }
+                inlineCode.append(bodyCode);
+            }
         }
         
         currentScope = previousScope;

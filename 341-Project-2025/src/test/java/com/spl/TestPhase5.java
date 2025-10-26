@@ -40,7 +40,7 @@ public class TestPhase5 extends TestCase {
         
         new TestCase("test_print_literal.spl", true,
             "Valid: Print literal string",
-            "10 t", "20 PRINT", "30 STOP"),
+            "10 PRINT", "20 STOP"),
         
         new TestCase("test_simple_assignment.spl", true,
             "Valid: Simple variable assignment",
